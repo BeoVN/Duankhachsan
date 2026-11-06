@@ -1,0 +1,110 @@
+*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172638;color:#fff;font-family:system-ui,Arial,sans-serif;touch-action:manipulation}
+#game{height:100dvh;width:100vw;display:flex;flex-direction:column;background:#172638}
+.hud{height:74px;flex:none;display:flex;flex-direction:column;justify-content:center;padding:6px 12px;background:#20364c;border-bottom:2px solid #456078;z-index:10;}
+.hud-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.brand{font-weight:900;font-size:clamp(13px, 4vw, 16px);color:#fff;letter-spacing:0.5px;white-space:nowrap;}
+.money-box{background:#1a2b3d;border:1px solid #3a5068;padding:4px 12px;border-radius:20px;font-size:clamp(13px, 3.5vw, 15px);color:#fff;box-shadow:0 2px 0 #0005;white-space:nowrap;}
+.money-box b{color:#ffdc7a;}
+.rating-box{background:#1a2b3d;border:1px solid #3a5068;padding:4px 10px;border-radius:20px;font-size:clamp(12px, 3vw, 14px);color:#fff;display:flex;align-items:center;gap:4px;white-space:nowrap;}
+.rating-box b{color:#ffdc7a;}
+.hud-bottom{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:bold;color:#fff;}
+.player-info{display:flex;align-items:center;gap:4px;white-space:nowrap;}
+#hudName{color:#c9d8e6;}
+#hudLv{color:#ffdc7a;}
+.exp-container{display:flex;align-items:center;gap:6px;}
+.exp-bar{width:50px;height:6px;background:#111e2b;border-radius:3px;overflow:hidden;border:1px solid #456078;}
+.exp-fill{height:100%;background:#4ecdc4;transition:width 0.3s;}
+#hudExp{font-size:9px;color:#a0b4c8;font-weight:normal;}
+.version{font-size:9px;color:#7d93a8;font-weight:normal;margin-left:auto; padding-left:8px;}
+#scene{position:relative;flex:1;min-height:0;overflow:hidden;background:#101923}
+canvas{display:block;position:absolute;left:0;top:-100px;width:100%;height:100%;image-rendering:pixelated}
+#fullscreen{position:absolute;right:10px;top:10px;z-index:3;padding:8px 10px;font-size:11px; background:#d28a43; color:#fff; border:none; border-radius:8px; font-weight:bold; box-shadow:0 3px 0 #855225;}
+.scene-btn{position:absolute;border:0;background:transparent;cursor:pointer;z-index:3;padding:0;border-radius:8px; transition: background 0.2s;}
+.scene-btn:active{background:#ffffff44}
+.bottom{flex:none;min-height:70px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-around;gap:10px;background:#20364c;border-top:2px solid #456078;z-index:10}
+.nav-btn{background:#1a2b3d; border:1px solid #3a5068; color:#8899a6; padding:8px 0; font-size:13px; display:flex; flex-direction:column; align-items:center; width:31%; border-radius:8px; transition: all 0.2s; font-weight:bold; line-height:1.3;}
+.nav-btn:active{transform:scale(0.95);}
+.nav-btn.active{background:#2c4a66; border:2px solid #ffdc7a; color:#ffdc7a;}
+.panel{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#102030d0;z-index:9999;padding:10px; backdrop-filter: blur(3px);}
+.panel.show{display:flex}
+.window{width:min(720px,95%);max-height:85dvh;overflow-y:auto;background:#e8dfce;color:#253548;border:5px solid #71523d;border-radius:14px;padding:10px;box-shadow:0 12px 35px #0008; display:flex; flex-direction:column; padding-bottom: 0;}
+.window h2{margin:0 0 5px;font-size:18px; text-align:center;}
+.window p{margin:0 0 5px;font-size:12px; text-align:center;}
+.rooms{width:100%; display:flex; flex-direction:column;}
+.room{min-width:0;background:#fff8e9;border:2px solid #c4a77d;border-radius:6px;padding:4px 1px;text-align:center;font-weight:900;font-size:12px;color:#31465b; cursor:pointer;}
+.room small{display:block;font-size:9px;font-weight:600;color:#7b6b58;margin-top:1px}
+.room.selected{background:#ffe29a;border-color:#bd792e}
+.room.match-req {background: #e0f7fa;border-color: #00bcd4;box-shadow: 0 0 10px #00bcd4;animation: pulse 1.5s infinite;}
+@keyframes pulse {0% { box-shadow: 0 0 5px #00bcd4; }50% { box-shadow: 0 0 15px #00bcd4; }100% { box-shadow: 0 0 5px #00bcd4; }}
+.panel-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px; position: sticky; bottom: 0; background: #e8dfce; padding: 10px 0; z-index: 10;}
+button.btn-base{border:0;border-radius:12px;padding:12px 16px;background:#d28a43;color:#fff;font-size:14px;font-weight:900;box-shadow:0 4px 0 #855225;cursor:pointer}
+button.secondary{background:#49627a;box-shadow:0 4px 0 #293d51}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #293d51}
+#computerPanel .window{width:min(820px,100%);background:#dde7ef;border-color:#2c4a63}
+#computerPanel h2{color:#1e3a52}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap; justify-content:center;}
+.tab{border:0;border-radius:8px;padding:8px 14px;background:#b8c9d8;color:#1e3a52;font-weight:900;font-size:13px;cursor:pointer}
+.tab.active{background:#2c6e9e;color:#fff}
+.tab-content{display:none;background:#fff;border-radius:10px;padding:14px;min-height:220px;color:#253548;font-size:13px}
+.tab-content.active{display:block}
+.msg{display:flex;gap:10px;padding:10px;border-bottom:1px solid #e0e6ec;align-items:flex-start}
+.msg .avatar{width:36px;height:36px;border-radius:50%;background:#2c6e9e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none}
+.msg .body{flex:1}
+.msg .name{font-weight:900;font-size:13px;color:#1e3a52}
+.msg .text{font-size:12px;color:#4a5d6e;margin-top:2px}
+.msg .time{font-size:10px;color:#8a9aa8;white-space:nowrap}
+.status-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eef2f6;font-size:13px}
+.status-row b{color:#2c6e9e}
+.elev-btn{width:100%; text-align:left; padding:12px 15px; margin:0; background:#49627a; box-shadow:0 4px 0 #293d51; border:0; border-radius:8px; color:#fff; font-weight:bold; font-size:14px;}
+.elev-btn:active{transform:translateY(2px); box-shadow:0 2px 0 #293d51;}
+.current-tag {float: right; color: #ffdc7a; font-size: 12px; font-weight: bold; background: #20364c; padding: 2px 6px; border-radius: 4px; border: 1px solid #456078;}
+.input-field{width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-top:5px; font-size:15px; font-family:inherit;}
+#toast{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);padding:10px 16px;background:#1d3045ed;border:1px solid #6e879d;border-radius:10px;font-size:13px;text-align:center;z-index:50;display:none;max-width:90%; pointer-events:none; font-weight:bold;}
+#mainMenu {position: absolute; inset: 0; z-index:1000; background: linear-gradient(135deg, #0f172a, #20364c, #0f172a); display: flex; align-items: center; justify-content: center;}
+.menu-content {text-align: center; padding: 20px; width: 100%; max-width: 320px;}
+.game-title {font-size: clamp(32px, 10vw, 45px); font-weight: 900; color: #ffdc7a; line-height: 1.1; margin: 0 0 5px 0; text-shadow: 0 4px 15px rgba(255, 220, 122, 0.3);}
+.game-subtitle {font-size: 15px; color: #88a3ba; margin-bottom: 35px; font-weight: bold; letter-spacing: 2px;}
+.menu-buttons {display: flex; flex-direction: column; gap: 12px; width: 100%;}
+.btn-main {background: #d28a43; color: #fff; font-size: 18px; font-weight: 900; padding: 15px; border-radius: 12px; box-shadow: 0 6px 0 #855225; border: none; cursor: pointer; width: 100%; font-family: inherit;}
+.btn-main:active {transform: translateY(4px); box-shadow: 0 2px 0 #855225;}
+.btn-sub {background: #2c4a66; color: #c9d8e6; font-size: 14px; font-weight: bold; padding: 12px; border-radius: 10px; border: 1px solid #456078; cursor: pointer; width: 100%; font-family: inherit;}
+.btn-sub:active {background: #1a2b3d; transform: translateY(2px);}
+.panel-text ul {padding-left: 20px; margin: 0;}
+.panel-text li {margin-bottom: 8px; font-size: 13px; line-height: 1.5; color: #253548;}
+/* Đồng hồ và Lịch */
+#timeWidget { font-family: system-ui; }
+.cal-day { padding: 5px 0; border-radius: 4px; color: #253548; }
+.cal-day.header { font-weight: bold; color: #888; }
+.cal-day.today { background: #d28a43; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(210,138,67,0.5); }
+.cal-day.empty { color: transparent; }
+/* --- CSS CHO LỊCH --- */
+.cal-day { padding: 5px 0; border-radius: 4px; color: #253548; }
+.cal-day.header { font-weight: bold; color: #888; }
+.cal-day.today { background: #d28a43; color: white !important; font-weight: bold; box-shadow: 0 2px 5px rgba(210,138,67,0.5); }
+.cal-day.empty { color: transparent; }
+/* Thêm màu đỏ cho ngày lễ và cuối tuần */
+.cal-day.cal-holiday { color: #ef4444; font-weight: bold; } 
+.cal-day.header.cal-holiday { color: #ef4444; } 
+/* Chỉnh riêng cho bảng Máy tính để có thể lướt nội dung */
+#computerPanel .window {
+  height: 90dvh !important; /* Chiếm 90% chiều cao màn hình */
+  display: flex;
+  flex-direction: column;
+}
+
+#computerPanel .tabs {
+  flex: none; /* Phần Tab không bị co lại */
+}
+
+#computerPanel .tab-content.active {
+  flex: 1; /* Phần nội dung chiếm hết khoảng trống còn lại */
+  overflow-y: auto; /* Cho phép cuộn lên xuống */
+  padding-bottom: 20px; /* Tạo khoảng trống nhỏ ở dưới cùng cho đẹp */
+}
+
+#computerPanel .panel-actions {
+  flex: none; /* Nút Đóng luôn nằm cố định ở dưới */
+  padding-top: 10px;
+  border-top: 1px solid #cbd5e1; /* Tạo đường kẻ ngăn cách nhẹ */
+}

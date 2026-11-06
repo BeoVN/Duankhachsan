@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#172638">
+<title>Khách sạn của tôi - v0.2</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ========================================== -->
+<!-- 1. MÀN HÌNH MENU CHÍNH -->
+<!-- ========================================== -->
+<div id="mainMenu">
+  <div class="menu-content">
+    <h1 class="game-title">KHÁCH SẠN<br>CỦA TÔI</h1>
+    <p class="game-subtitle">Khách sạn của riêng bạn</p>
+    <div class="menu-buttons">
+      <button class="btn-main" id="startBtn">▶ BẮT ĐẦU</button>
+      <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
+      <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.2)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 2. GIAO DIỆN CHÍNH CỦA GAME -->
+<!-- ========================================== -->
+<div id="game">
+  
+  <!-- THANH HEADER -->
+  <header class="hud">
+    <div class="hud-top">
+      <div class="brand">SUNRISE HOTEL</div>
+      <div class="money-box"><b id="money">500.000đ</b></div>
+      <div class="rating-box">⭐ <b id="rating">5.0</b></div>
+    </div>
+    <div class="hud-bottom">
+      <div class="player-info">
+        <span id="hudName">👤 Minh</span> - <span id="hudLv">Lv.1</span>
+      </div>
+      <div class="exp-container">
+        <div class="exp-bar"><div class="exp-fill" id="expFill" style="width:0%;"></div></div>
+        <span id="hudExp">0/100</span>
+      </div>
+      <div class="version">v0.2</div>
+    </div>
+  </header>
+
+  <!-- KHU VỰC SCENE (CANVAS VÀ CÁC LỚP ĐÈ LÊN) -->
+  <main id="scene">
+    <canvas id="view" width="960" height="600"></canvas>
+    
+    <!-- Đồng hồ và Lịch -->
+    <div id="clockWidget" style="position:absolute; left:50%; transform:translateX(-50%); top:10px; z-index:5; background:rgba(255,255,255,0.9); padding:6px 20px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.2); border:2px solid #ffdc7a; color:#1e3a52; font-weight:900; font-size:16px;">00h00p</div>
+    <div id="dateWidget" style="position:absolute; right:10px; top:10px; z-index:5; background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.2); border:2px solid #ffdc7a; color:#1e3a52; display:flex; flex-direction:column; align-items:flex-end; min-width:80px;">
+      <div id="gameDate" style="font-weight:bold; font-size:12px;">01/01/2024</div>
+      <div id="openCalendarBtn" style="font-size:10px; color:#d28a43; font-weight:bold; cursor:pointer; text-decoration:underline;">Xem lịch</div>
+    </div>
+
+    <div id="toast"></div>
+
+    <!-- Nút tàng hình trên máy tính và kệ chìa khóa -->
+    <button class="scene-btn" id="computerBtn" title="Mở máy tính"></button>
+    <button class="scene-btn" id="keysBtn" title="Mở kệ chìa khoá"></button>
+
+    <!-- ========================================== -->
+    <!-- CÁC BẢNG PANEL (HIỆN LÊN KHI BẤM NÚT) -->
+    <!-- ========================================== -->
+
+    <!-- Bảng Máy Tính -->
+    <section class="panel" id="computerPanel">
+      <div class="window">
+        <h2>💻 MÁY TÍNH LỄ TÂN</h2>
+        <div class="tabs">
+          <button class="tab" data-tab="register">📝 Đăng ký</button>
+          <button class="tab active" data-tab="dashboard">📊 Sơ đồ phòng</button>
+          <button class="tab" data-tab="receipt">🧾 Sao kê</button>
+          <button class="tab" data-tab="messages">💬 Tin nhắn</button>
+        </div>
+    <!-- BẢNG HÓA ĐƠN (BILL) -->
+<section class="panel" id="billPanel">
+  <div class="window" style="width:min(400px,100%); background:#fff; color:#253548;">
+    <h2 style="color:#2c6e9e; border-bottom:2px dashed #ccc; padding-bottom:10px;">🧾 HÓA ĐƠN THANH TOÁN</h2>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; font-size:14px;">
+      <div style="display:flex; justify-content:space-between;"><span>Tên khách:</span> <b id="billName">---</b></div>
+      <div style="display:flex; justify-content:space-between;"><span>Phòng:</span> <b id="billRoom">---</b></div>
+      <div style="display:flex; justify-content:space-between;"><span>Đến:</span> <b id="billIn">---</b></div>
+      <div style="display:flex; justify-content:space-between;"><span>Đi:</span> <b id="billOut">---</b></div>
+      <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #eee; padding-top:10px;"><span>Tiền phòng:</span> <b id="billPrice">0đ</b></div>
+      <div style="display:flex; justify-content:space-between;"><span>VAT (10%):</span> <b id="billVat">0đ</b></div>
+      <div style="display:flex; justify-content:space-between; font-size:16px; color:#d28a43; margin-top:5px; border-top:1px solid #eee; padding-top:10px;"><span>Thành tiền:</span> <b id="billTotal">0đ</b></div>
+    </div>
+    <div class="panel-actions" style="justify-content:center; margin-top:20px;">
+      <button class="btn-base" id="payBillBtn" style="width:100%;">Xác nhận thanh toán</button>
+    </div>
+  </div>
+</section>
+        <!-- Tab Đăng Ký (Chia 2 cột) -->
+<div class="tab-content" id="tab-register">
+  <div style="display:flex; gap:15px; flex-wrap:wrap;">
+    
+    <!-- Cột Trái: Tóm tắt lời khách nói -->
+    <div style="flex:1; min-width:200px; background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #bae6fd;">
+      <h3 style="font-size:14px; color:#1e3a52; margin-top:0; border-bottom:1px solid #bae6fd; padding-bottom:5px;">Khách hàng đã nói:</h3>
+      <p style="font-size:12px; margin:5px 0;"><b>Tên:</b> <span id="guestSaidName">---</span></p>
+      <p style="font-size:12px; margin:5px 0;"><b>Yêu cầu:</b> <span id="guestSaidReq">---</span></p>
+      <p style="font-size:12px; margin:5px 0;"><b>Thời gian ở:</b> <span id="guestSaidTime">---</span></p>
+      <p style="font-size:12px; margin:5px 0;"><b>CCCD:</b> <span id="guestSaidId">---</span></p>
+    </div>
+
+    <!-- Cột Phải: Form đăng ký -->
+    <div style="flex:1; min-width:200px; display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+        <input type="text" id="regName" class="input-field" placeholder="VD: Nguyễn Văn A">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label>
+        <input type="number" id="regAge" class="input-field" placeholder="VD: 25">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD / Hộ chiếu</label>
+        <input type="text" id="regId" class="input-field" placeholder="Nhập số giấy tờ...">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số người</label>
+        <select id="regPeople" class="input-field">
+          <option value="1">1 người</option>
+          <option value="2">2 người</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Phòng</label>
+        <input type="text" id="regRoom" class="input-field" readonly>
+      </div>
+      <div style="display:flex; gap:5px;">
+        <div style="flex:1;">
+          <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Giờ đến</label>
+          <input type="text" id="regTimeIn" class="input-field" readonly>
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Giờ đi</label>
+          <input type="text" id="regTimeOut" class="input-field" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+ 
+  <button class="btn-base secondary" id="confirmRegisterBtn" style="margin-top:5px; width:100%; border:1px solid #2c6e9e;">Đối chiếu & Xác nhận</button>
+<!-- NÚT BILL (Ẩn lúc đầu) -->
+<button class="btn-base" id="showBillBtn" style="margin-top:5px; width:100%; display:none; background:#e67e22; box-shadow:0 4px 0 #a04000;">🧾 Xem Hóa Đơn Thanh Toán</button>
+</div>
+        
+        <!-- Tab Sơ đồ phòng -->
+        <div class="tab-content active" id="tab-dashboard">
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; font-weight:bold; color:#1e3a52;">
+            <span>Đang có khách: <span id="dash-occupied" style="color:#ef4444;">0 / 30</span></span>
+            <span>Doanh thu: <span id="dash-revenue" style="color:#2c6e9e;">0đ</span></span>
+          </div>
+          <div class="rooms" id="dash-room-grid"></div>
+        </div>
+
+        <!-- Tab Sao kê -->
+        <div class="tab-content" id="tab-receipt">
+          <div style="display:flex; justify-content:space-between; background:#f0f4f8; padding:10px; border-radius:8px; margin-bottom:10px; font-weight:bold; color:#1e3a52;">
+            <span>Khách sạn thu: <span id="bill-total" style="color:#2c6e9e;">0đ</span></span>
+            <span>Bạn nhận (40%): <span id="bill-comm" style="color:#e67e22;">0đ</span></span>
+          </div>
+          <div id="receipt-list" style="max-height:200px; overflow-y:auto;">
+            <p style="text-align:center; color:#888; font-size:12px; margin-top:20px;">Chưa có giao dịch nào.</p>
+          </div>
+        </div>
+
+        <!-- Tab Tin nhắn -->
+        <div class="tab-content" id="tab-messages">
+          <div class="msg"><div class="avatar">Q</div><div class="body"><div class="name">Quản lý</div><div class="text">Nhớ kiểm tra kỹ sơ đồ phòng trên máy tính nhé.</div></div><div class="time">08:00</div></div>
+        </div>
+        
+        <div class="panel-actions" style="justify-content:center;">
+          <button class="btn-base secondary" id="closeComputer">← Đóng</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bảng Kệ Chìa Khóa -->
+    <section class="panel" id="keyPanel">
+      <div class="window">
+        <h2>🗝️ KỆ CHÌA KHÓA</h2>
+        <p>Chọn phòng để nhận khách (Thu 500.000đ / Hoa hồng 40%)</p>
+        <div class="rooms" id="rooms"></div>
+        
+        <!-- Bảng chọn gói cước -->
+        <div id="rentOptions" style="display:none; background:#f8f9fa; padding:10px; border-radius:8px; margin-top:10px; border:1px solid #cbd5e1;">
+          <p style="font-weight:bold; color:#1e3a52; margin-bottom:8px; text-align:center; font-size:13px;">Chọn hình thức thuê:</p>
+          <div style="display:flex; gap:5px; justify-content:center;">
+            <button class="rent-type-btn" data-type="hour" style="flex:1; padding:8px 5px; font-size:12px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer;">Theo giờ</button>
+            <button class="rent-type-btn" data-type="night" style="flex:1; padding:8px 5px; font-size:12px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer;">Qua đêm</button>
+            <button class="rent-type-btn" data-type="day" style="flex:1; padding:8px 5px; font-size:12px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer;">Dài hạn</button>
+          </div>
+          <div id="rentPriceDisplay" style="text-align:center; font-weight:bold; color:#d28a43; margin-top:10px; font-size:16px;">0đ</div>
+        </div>
+        
+        <div class="panel-actions">
+          <button class="btn-base secondary" id="closeKey">← Đóng</button>
+          <button class="btn-base" id="takeKey" disabled style="opacity:0.5;">Nhận phòng & Lấy chìa</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bảng Thang Máy -->
+    <section class="panel" id="elevatorPanel">
+      <div class="window" style="width:min(400px,100%);">
+        <h2>🛗 THANG MÁY</h2>
+        <p>Chọn tầng bạn muốn đến</p>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+          <button class="elev-btn" data-floor="6">Tầng 6 - 6 Phòng Tổng Thống <span class="current-tag" style="display:none;">(Hiện tại)</span></button>
+          <button class="elev-btn" data-floor="5">Tầng 5 - 6 Phòng Lãng Mạn <span class="current-tag" style="display:none;">(Hiện tại)</span></button>
+          <button class="elev-btn" data-floor="4">Tầng 4 - 6 Phòng VIP <span class="current-tag" style="display:none;">(Hiện tại)</span></button>
+          <button class="elev-btn" data-floor="3">Tầng 3 - 6 Phòng Đôi <span class="current-tag" style="display:none;">(Hiện tại)</span></button>
+          <button class="elev-btn" data-floor="2">Tầng 2 - 6 Phòng Đơn <span class="current-tag" style="display:none;">(Hiện tại)</span></button>
+          <button class="elev-btn" data-floor="1">Tầng 1 - Sảnh chính <span class="current-tag" style="display:none;">(Hiện tại)</span></button>
+        </div>
+        <div class="panel-actions" style="justify-content:center; margin-top:15px;">
+          <button class="btn-base secondary" id="closeElevator">← Đóng</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bảng Cá Nhân -->
+    <section class="panel" id="profilePanel">
+      <div class="window" style="width:min(400px,100%);">
+        <h2>👤 THÔNG TIN CÁ NHÂN</h2>
+        <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+          <div>
+            <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Tên hiển thị</label>
+            <input type="text" id="inputName" class="input-field" value="Minh">
+          </div>
+          <div style="background:#d4e2ed; padding:10px; border-radius:8px; display:flex; justify-content:space-between;">
+            <b>Cấp độ (LV):</b> <span style="color:#2c6e9e; font-weight:900;">1</span>
+          </div>
+        </div>
+        <div class="panel-actions" style="margin-top:20px;">
+          <button class="btn-base secondary" id="closeProfile">← Đóng</button>
+          <button class="btn-base" id="saveProfile">Lưu thay đổi</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bảng Hướng Dẫn / Cập Nhật (Dùng chung) -->
+    <section class="panel" id="guidePanel">
+      <div class="window">
+        <h2 id="panelTitle">📖 HƯỚNG DẪN CHƠI</h2>
+        <div id="panelContent" class="panel-text"></div>
+        <div class="panel-actions" style="justify-content:center; margin-top:20px;">
+          <button class="btn-base secondary" id="closeGuide">← Đóng</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bảng Lịch Chi Tiết -->
+    <section class="panel" id="calendarPanel">
+      <div class="window" style="width:min(400px,100%);">
+        <h2 id="calendarTitle">📅 Lịch</h2>
+        <div id="calendarGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:5px; text-align:center; margin-top:15px; font-size:12px;"></div>
+        <div class="panel-actions" style="justify-content:center; margin-top:15px;">
+          <button class="btn-base secondary" id="closeCalendar">← Đóng</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Khung Hội Thoại Với Khách -->
+    <div id="chatBox" style="display:none; position:absolute; bottom:10px; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:rgba(255,255,255,0.95); border:3px solid #d28a43; border-radius:12px; padding:15px; box-shadow:0 10px 25px rgba(0,0,0,0.5); z-index:100; color:#1e3a52;">
+      <div style="display:flex; justify-content:space-between; border-bottom:1px solid #ccc; padding-bottom:8px; margin-bottom:10px;">
+        <strong id="chatGuestName" style="color:#d28a43; font-size:16px;">Khách hàng</strong>
+      </div>
+      <div id="chatHistory" style="max-height:120px; overflow-y:auto; font-size:14px; line-height:1.5; margin-bottom:10px; display:flex; flex-direction:column; gap:8px;"></div>
+
+<!-- NÚT MỞ MÁY TÍNH (Ẩn lúc đầu) -->
+<button id="openComputerFromChatBtn" class="btn-base" style="display:none; width:100%; padding:10px; margin-bottom:10px;">💻 Mở Máy tính đối chiếu</button>
+
+<div style="display:flex; gap:10px;">
+  <button id="chatActionBtn" class="btn-base" style="flex:1; padding:10px;">Tiếp tục</button>
+</div>
+    </div>
+
+  </main>
+
+  <!-- THANH MENU DƯỚI CÙNG (FOOTER) -->
+  <footer class="bottom">
+    <button class="nav-btn active" id="btnLobby">🚪<br>Sảnh chính</button>
+    <button class="nav-btn" id="btnElevator">🛗<br>Thang máy</button>
+    <button class="nav-btn" id="btnProfile">👤<br>Cá nhân</button>
+  </footer>
+  
+</div>
+
+<!-- ========================================== -->
+<!-- 3. GỌI CÁC FILE JAVASCRIPT -->
+<!-- ========================================== -->
+<script src="changelog.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
