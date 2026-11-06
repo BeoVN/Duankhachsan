@@ -16,9 +16,41 @@ function showChangelog() {
       </style>
 
       <!-- PHIÊN BẢN MỚI NHẤT -->
+
       <details open>
-  <summary>Phiên bản 0.2.2 (Mới nhất)</summary>
+  <summary>Phiên bản 0.2.6 (Mới nhất)</summary>
+  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 20:00 - 05/11/2026</div>
   <ul>
+  <li><b>Tất cả được tóm tắt bởi A.I</b></li>
+    <li>✅ <b>Quản lý đoàn khách:</b> Hỗ trợ đoàn từ 1 đến 4 người, có cả người lớn và trẻ em (tự động khóa ô CCCD nếu dưới 18 tuổi).</li>
+    <li>✅ <b>Giao diện Đăng ký mới:</b> Tự động hiển thị form tương ứng (1, 2, 3, 4 người) với đầy đủ thông tin Tên - Tuổi - CCCD.</li>
+    <li>✅ <b>Hình ảnh chân thực:</b> Khách hàng hiển thị bằng hình ảnh chân dung, tự động thay đổi kích thước và vị trí theo số lượng người.</li>
+    <li>✅ <b>Hoạt động trong phòng:</b> Khách có thể nằm chung giường, quây quần ở bàn làm việc hoặc ngồi trò chuyện giữa phòng.</li>
+    <li>✅ <b>Bảng giá mới:</b> Áp dụng chiết khấu cho đoàn đông (2 người giảm 10%, 3 người giảm 20%, 4 người giảm 30%).</li>
+    <li>✅ <b>Hóa đơn tối giản:</b> Lược bỏ tên khách hàng trên Bill, chỉ hiển thị thông tin phòng và chi phí.</li>
+  </ul>
+</details>
+
+
+      <details open>
+  <summary>Phiên bản 0.2.5</summary>
+  <ul>
+  <li><b>Tất cả được tóm tắt bởi A.I</b></li>
+    <li>✅ <b>Quy trình Check-in chuyên nghiệp:</b> Khách tự động hỏi đáp, thu thập Tên, CCCD, Tuổi và thời gian lưu trú.</li>
+    <li>✅ <b>Thời gian thực tế:</b> Khách thuê qua đêm (chỉ từ 18h-23h) sẽ tự động trả phòng lúc 7h sáng hôm sau.</li>
+    <li>✅ <b>Tính tiền tự động:</b> Tự động áp dụng giá theo giờ/ngày/qua đêm, giảm 30% cho khách đi đôi, cộng 10% VAT.</li>
+    <li>✅ <b>Hóa đơn (Bill) chi tiết:</b> Xuất hóa đơn rõ ràng trước khi thanh toán.</li>
+    <li>✅ <b>Nhật ký hoạt động:</b> Tab Nhật ký ghi lại chính xác thời gian nhận và trả phòng của từng phòng.</li>
+    <li>✅ <b>Giao diện Máy tính thông minh:</b> Tự động ẩn/hiện thanh Tab và Khung "Khách đã nói" tùy theo ngữ cảnh (Đăng ký hay xem Sơ đồ).</li>
+    <li>✅ <b>Tối ưu hóa:</b> Sửa lỗi văng khung, lỗi nút bấm và tự động reset form sau khi nhận phòng thành công.</li>
+  </ul>
+</details>
+
+
+      <details open>
+  <summary>Phiên bản 0.2.2 </summary>
+  <ul>
+  <li><b>Tất cả được tóm tắt bởi A.I</b></li>
     <li>✅ <b>Quy trình Check-in mới:</b> Khách tự động bắt đầu hội thoại, hỏi tên, CCCD, số tuổi và thời gian lưu trú.</li>
     <li>✅ <b>Giao diện Máy tính:</b> Chia làm 2 cột (bên trái tóm tắt khách nói, bên phải là form đăng ký).</li>
     <li>✅ <b>Tự động điền phòng:</b> Hệ thống tự quét và điền số phòng trống phù hợp với yêu cầu của khách.</li>
@@ -32,6 +64,7 @@ function showChangelog() {
       <details open>
         <summary>Phiên bản 0.2.0 </summary>
         <ul>
+        <li><b>Tất cả được tóm tắt bởi A.I</b></li>
           <li>✅ <b>Hệ thống khách hàng:</b> Khách đơn và khách đôi (2 người).</li>
           <li>✅ <b>Đa dạng ngoại hình:</b> Khách có màu da, kiểu tóc và màu áo ngẫu nhiên.</li>
           <li>✅ <b>Tên tiếng Việt:</b> Kho tên phong phú (Họ, tên đệm, tên chính).</li>
@@ -53,6 +86,7 @@ function showChangelog() {
       <details>
         <summary>Phiên bản 0.1.4</summary>
         <ul>
+        <li><b>Tất cả được tóm tắt bởi A.I</b></li>
           <li>✅ Cập nhật giao diện Menu chính (thêm Hướng dẫn, Cập nhật).</li>
           <li>✅ Thanh Header hiển thị thông tin: Tên, Level, Tiền VNĐ, Đánh giá 5 sao.</li>
           <li>✅ Thêm tab <b>Sao kê</b> vào Máy tính để xem lịch sử giao dịch.</li>
@@ -64,6 +98,7 @@ function showChangelog() {
       <details>
         <summary>Phiên bản 0.1.3</summary>
         <ul>
+        <li><b>Tất cả được tóm tắt bởi A.I</b></li>
           <li>✅ Hoàn thiện Giao diện chính (Menu, Header).</li>
           <li>✅ Thêm hệ thống Thang máy (Sảnh, 5 tầng phòng).</li>
           <li>✅ Thêm bảng Thông tin cá nhân (có thể đổi tên).</li>
@@ -74,6 +109,7 @@ function showChangelog() {
       <details>
         <summary>Phiên bản 0.1.2</summary>
         <ul>
+        <li><b>Tất cả được tóm tắt bởi A.I</b></li>
           <li>✅ Chia file thành 3 phần (HTML, CSS, JS) để dễ quản lý.</li>
           <li>✅ Sửa lỗi giao diện bị kéo dài.</li>
           <li>✅ Cập nhật lại bức tường trắng và cửa kính nhìn ra thành phố.</li>
@@ -83,6 +119,7 @@ function showChangelog() {
       <details>
         <summary>Phiên bản 0.1.1 (Bản khởi đầu)</summary>
         <ul>
+        <li><b>Tất cả được tóm tắt bởi A.I</b></li>
           <li>✅ Tạo dựng khung game cơ bản.</li>
           <li>✅ Vẽ cảnh Sảnh chính và Quầy lễ tân đơn giản.</li>
           <li>✅ Thêm nút tương tác cơ bản (Máy tính, Kệ chìa khóa).</li>

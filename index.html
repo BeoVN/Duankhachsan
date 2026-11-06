@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#172638">
-<title>Khách sạn của tôi - v0.2</title>
+<title>Khách sạn của tôi - v0.2.6</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
     <div class="menu-buttons">
       <button class="btn-main" id="startBtn">▶ BẮT ĐẦU</button>
       <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
-      <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.2)</button>
+      <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.2.6)</button>
     </div>
   </div>
 </div>
@@ -44,7 +44,7 @@
         <div class="exp-bar"><div class="exp-fill" id="expFill" style="width:0%;"></div></div>
         <span id="hudExp">0/100</span>
       </div>
-      <div class="version">v0.2</div>
+      <div class="version">v0.2.6</div>
     </div>
   </header>
 
@@ -53,7 +53,10 @@
     <canvas id="view" width="960" height="600"></canvas>
     
     <!-- Đồng hồ và Lịch -->
-    <div id="clockWidget" style="position:absolute; left:50%; transform:translateX(-50%); top:10px; z-index:5; background:rgba(255,255,255,0.9); padding:6px 20px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.2); border:2px solid #ffdc7a; color:#1e3a52; font-weight:900; font-size:16px;">00h00p</div>
+    <div id="clockWidget" style="position:absolute; left:50%; transform:translateX(-50%); top:10px; z-index:5; background:rgba(255,255,255,0.9); padding:6px 20px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.2); border:2px solid #ffdc7a; color:#1e3a52; font-weight:900; font-size:16px; text-align:center; display:flex; flex-direction:column; line-height:1.2;">
+  <span id="clockTime">00h00p</span>
+  <span id="clockShift" style="font-size:10px; font-weight:bold; color:#d28a43; margin-top:2px;">Ca Ngày</span>
+    </div>
     <div id="dateWidget" style="position:absolute; right:10px; top:10px; z-index:5; background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.2); border:2px solid #ffdc7a; color:#1e3a52; display:flex; flex-direction:column; align-items:flex-end; min-width:80px;">
       <div id="gameDate" style="font-weight:bold; font-size:12px;">01/01/2024</div>
       <div id="openCalendarBtn" style="font-size:10px; color:#d28a43; font-weight:bold; cursor:pointer; text-decoration:underline;">Xem lịch</div>
@@ -69,22 +72,233 @@
     <!-- CÁC BẢNG PANEL (HIỆN LÊN KHI BẤM NÚT) -->
     <!-- ========================================== -->
 
-    <!-- Bảng Máy Tính -->
-    <section class="panel" id="computerPanel">
-      <div class="window">
-        <h2>💻 MÁY TÍNH LỄ TÂN</h2>
-        <div class="tabs">
-          <button class="tab" data-tab="register">📝 Đăng ký</button>
-          <button class="tab active" data-tab="dashboard">📊 Sơ đồ phòng</button>
-          <button class="tab" data-tab="receipt">🧾 Sao kê</button>
-          <button class="tab" data-tab="messages">💬 Tin nhắn</button>
+ <!-- BẢNG MÁY TÍNH -->
+<section class="panel" id="computerPanel">
+  <div class="window">
+    <h2>💻 MÁY TÍNH LỄ TÂN</h2>
+    
+    <!-- KHUNG THÔNG TIN CCCD CỦA ĐOÀN -->
+<div id="guestSummaryBox" style="display:none; background:#e0f2fe; padding:8px 10px; border-radius:8px; border:1px solid #bae6fd; margin-bottom:10px; font-size:12px;">
+  <b style="color:#1e3a52; display:block; margin-bottom:5px;">Thông tin CCCD:</b>
+  <div id="cccdDetails" style="display:flex; flex-direction:column; gap:5px;">
+    <!-- Nội dung chi tiết sẽ được điền bằng JS -->
+  </div>
+</div>
+
+    <!-- 2. THANH CHỌN TAB -->
+    <div class="tabs" id="computerTabs">
+      <button class="tab" data-tab="register">📝 Đăng ký</button>
+      <button class="tab active" data-tab="dashboard">📊 Sơ đồ phòng</button>
+      <button class="tab" data-tab="receipt">🧾 Sao kê</button>
+      <button class="tab" data-tab="messages">💬 Tin nhắn</button>
+      <button class="tab" data-tab="diary">📖 Nhật ký</button>
+    </div>
+
+<!-- Tab Đăng ký với 4 Form -->
+<div class="tab-content" id="tab-register">
+  
+  <!-- Form 1 Người -->
+  <div id="form-1" class="guest-form" style="display:none; flex-direction:column; gap:10px;">
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f1_p1_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;">
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label>
+        <input type="number" id="f1_p1_age" class="input-field" readonly style="background:#eee; color:#555;">
+      </div>
+      <div style="flex:2;">
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label>
+        <input type="text" id="f1_p1_id" class="input-field" readonly style="background:#eee; color:#555;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Form 2 Người -->
+  <div id="form-2" class="guest-form" style="display:none; flex-direction:column; gap:10px;">
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px;"><b style="color:#d28a43;">Người 1 (Đại diện)</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f2_p1_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;">
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label>
+        <input type="number" id="f2_p1_age" class="input-field" readonly style="background:#eee; color:#555;">
+      </div>
+      <div style="flex:2;">
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label>
+        <input type="text" id="f2_p1_id" class="input-field" readonly style="background:#eee; color:#555;">
+      </div>
+    </div>
+    
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-top:5px;"><b style="color:#d28a43;">Người 2</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f2_p2_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;">
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label>
+        <input type="number" id="f2_p2_age" class="input-field" readonly style="background:#eee; color:#555;">
+      </div>
+      <div style="flex:2;">
+        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label>
+        <input type="text" id="f2_p2_id" class="input-field" readonly style="background:#eee; color:#555;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Form 3 Người -->
+  <div id="form-3" class="guest-form" style="display:none; flex-direction:column; gap:10px;">
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px;"><b style="color:#d28a43;">Người 1 (Đại diện)</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f3_p1_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label><input type="number" id="f3_p1_age" class="input-field" readonly style="background:#eee; color:#555;"></div>
+      <div style="flex:2;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label><input type="text" id="f3_p1_id" class="input-field" readonly style="background:#eee; color:#555;"></div>
+    </div>
+    
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-top:5px;"><b style="color:#d28a43;">Người 2</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f3_p2_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label><input type="number" id="f3_p2_age" class="input-field" readonly style="background:#eee; color:#555;"></div>
+      <div style="flex:2;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label><input type="text" id="f3_p2_id" class="input-field" readonly style="background:#eee; color:#555;"></div>
+    </div>
+    
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-top:5px;"><b style="color:#d28a43;">Người 3</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f3_p3_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label><input type="number" id="f3_p3_age" class="input-field" readonly style="background:#eee; color:#555;"></div>
+      <div style="flex:2;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label><input type="text" id="f3_p3_id" class="input-field" readonly style="background:#eee; color:#555;"></div>
+    </div>
+  </div>
+
+  <!-- Form 4 Người -->
+  <div id="form-4" class="guest-form" style="display:none; flex-direction:column; gap:10px;">
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px;"><b style="color:#d28a43;">Người 1 (Đại diện)</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f4_p1_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label><input type="number" id="f4_p1_age" class="input-field" readonly style="background:#eee; color:#555;"></div>
+      <div style="flex:2;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label><input type="text" id="f4_p1_id" class="input-field" readonly style="background:#eee; color:#555;"></div>
+    </div>
+    
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-top:5px;"><b style="color:#d28a43;">Người 2</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f4_p2_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label><input type="number" id="f4_p2_age" class="input-field" readonly style="background:#eee; color:#555;"></div>
+      <div style="flex:2;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label><input type="text" id="f4_p2_id" class="input-field" readonly style="background:#eee; color:#555;"></div>
+    </div>
+    
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-top:5px;"><b style="color:#d28a43;">Người 3</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f4_p3_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label><input type="number" id="f4_p3_age" class="input-field" readonly style="background:#eee; color:#555;"></div>
+      <div style="flex:2;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label><input type="text" id="f4_p3_id" class="input-field" readonly style="background:#eee; color:#555;"></div>
+    </div>
+    
+    <div style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-top:5px;"><b style="color:#d28a43;">Người 4</b></div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
+      <input type="text" id="f4_p4_name" class="input-field" readonly style="background:#eee; color:#555;">
+    </div>
+    <div style="display:flex; gap:5px;">
+      <div style="flex:1;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label><input type="number" id="f4_p4_age" class="input-field" readonly style="background:#eee; color:#555;"></div>
+      <div style="flex:2;"><label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD</label><input type="text" id="f4_p4_id" class="input-field" readonly style="background:#eee; color:#555;"></div>
+    </div>
+  </div>
+
+  <!-- HIỂN THỊ THÔNG TIN PHÒNG VÀ GIỜ -->
+  <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; background:#f0f4f8; padding:10px; border-radius:8px;">
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Phòng</label>
+      <input type="text" id="regRoom" class="input-field" readonly style="background:#fff;">
+    </div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Giờ đến</label>
+      <input type="text" id="regTimeIn" class="input-field" readonly style="background:#fff;">
+    </div>
+    <div>
+      <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Giờ đi</label>
+      <input type="text" id="regTimeOut" class="input-field" readonly style="background:#fff;">
+    </div>
+  </div>
+
+</div>
+    
+    <div class="tab-content active" id="tab-dashboard">
+      <!-- Sơ đồ phòng (Giữ nguyên) -->
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; font-weight:bold; color:#1e3a52;">
+        <span>Đang có khách: <span id="dash-occupied" style="color:#ef4444;">0 / 30</span></span>
+        <span>Doanh thu: <span id="dash-revenue" style="color:#2c6e9e;">0đ</span></span>
+      </div>
+      <div class="rooms" id="dash-room-grid"></div>
+    </div>
+
+    <div class="tab-content" id="tab-receipt">
+      <!-- Sao kê (Giữ nguyên) -->
+      <div style="display:flex; justify-content:space-between; background:#f0f4f8; padding:10px; border-radius:8px; margin-bottom:10px; font-weight:bold; color:#1e3a52;">
+        <span>Khách sạn thu: <span id="bill-total" style="color:#2c6e9e;">0đ</span></span>
+        <span>Bạn nhận (40%): <span id="bill-comm" style="color:#e67e22;">0đ</span></span>
+      </div>
+      <div id="receipt-list" style="max-height:200px; overflow-y:auto;"></div>
+    </div>
+
+    <div class="tab-content" id="tab-messages">
+      <!-- Tin nhắn (Giữ nguyên) -->
+      <div class="msg"><div class="avatar">Q</div><div class="body"><div class="name">Quản lý</div><div class="text">Nhớ kiểm tra kỹ sơ đồ phòng trên máy tính nhé.</div></div><div class="time">08:00</div></div>
+    </div>
+
+    <div class="tab-content" id="tab-diary">
+      <!-- Nhật ký (Giữ nguyên) -->
+      <div style="display:flex; gap:15px; height:100%;">
+        <div style="flex:1; background:#f0fdf4; padding:10px; border-radius:8px; border:1px solid #bbf7d0;">
+          <h3 style="font-size:14px; color:#166534; margin-top:0; text-align:center;">🟢 NHẬN PHÒNG</h3>
+          <div id="diaryCheckIn" style="max-height:250px; overflow-y:auto; font-size:12px;"></div>
         </div>
-    <!-- BẢNG HÓA ĐƠN (BILL) -->
-<section class="panel" id="billPanel">
+        <div style="flex:1; background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca;">
+          <h3 style="font-size:14px; color:#991b1b; margin-top:0; text-align:center;">🔴 TRẢ PHÒNG</h3>
+          <div id="diaryCheckOut" style="max-height:250px; overflow-y:auto; font-size:12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. THANH NÚT BẤM DƯỚI CÙNG -->
+    <div class="panel-actions" id="computerActions" style="justify-content:space-between;">
+      <!-- Nút Đối chiếu & Xem Bill (Chỉ hiện ở Tab Đăng ký) -->
+      <button class="btn-base secondary" id="confirmRegisterBtn" style="display:none; border:1px solid #2c6e9e; flex:1; margin-right:5px;">Đối chiếu</button>
+      <button class="btn-base" id="showBillBtn" style="display:none; background:#e67e22; box-shadow:0 4px 0 #a04000; flex:1; margin-right:5px;">Xem Bill</button>
+      
+      <!-- Nút Đóng (Chỉ hiện ở các Tab khác) -->
+      <button class="btn-base secondary" id="closeComputer" style="flex:1;">← Đóng</button>
+    </div>
+  </div>
+</section>
+
+<!-- BẢNG HÓA ĐƠN (BILL) -->
+<section class="panel" id="billPanel" style="z-index: 10000;">
   <div class="window" style="width:min(400px,100%); background:#fff; color:#253548;">
     <h2 style="color:#2c6e9e; border-bottom:2px dashed #ccc; padding-bottom:10px;">🧾 HÓA ĐƠN THANH TOÁN</h2>
     <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; font-size:14px;">
-      <div style="display:flex; justify-content:space-between;"><span>Tên khách:</span> <b id="billName">---</b></div>
+      
       <div style="display:flex; justify-content:space-between;"><span>Phòng:</span> <b id="billRoom">---</b></div>
       <div style="display:flex; justify-content:space-between;"><span>Đến:</span> <b id="billIn">---</b></div>
       <div style="display:flex; justify-content:space-between;"><span>Đi:</span> <b id="billOut">---</b></div>
@@ -97,99 +311,11 @@
     </div>
   </div>
 </section>
-        <!-- Tab Đăng Ký (Chia 2 cột) -->
-<div class="tab-content" id="tab-register">
-  <div style="display:flex; gap:15px; flex-wrap:wrap;">
-    
-    <!-- Cột Trái: Tóm tắt lời khách nói -->
-    <div style="flex:1; min-width:200px; background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #bae6fd;">
-      <h3 style="font-size:14px; color:#1e3a52; margin-top:0; border-bottom:1px solid #bae6fd; padding-bottom:5px;">Khách hàng đã nói:</h3>
-      <p style="font-size:12px; margin:5px 0;"><b>Tên:</b> <span id="guestSaidName">---</span></p>
-      <p style="font-size:12px; margin:5px 0;"><b>Yêu cầu:</b> <span id="guestSaidReq">---</span></p>
-      <p style="font-size:12px; margin:5px 0;"><b>Thời gian ở:</b> <span id="guestSaidTime">---</span></p>
-      <p style="font-size:12px; margin:5px 0;"><b>CCCD:</b> <span id="guestSaidId">---</span></p>
-    </div>
-
-    <!-- Cột Phải: Form đăng ký -->
-    <div style="flex:1; min-width:200px; display:flex; flex-direction:column; gap:10px;">
-      <div>
-        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Họ và tên</label>
-        <input type="text" id="regName" class="input-field" placeholder="VD: Nguyễn Văn A">
-      </div>
-      <div>
-        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Tuổi</label>
-        <input type="number" id="regAge" class="input-field" placeholder="VD: 25">
-      </div>
-      <div>
-        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số CCCD / Hộ chiếu</label>
-        <input type="text" id="regId" class="input-field" placeholder="Nhập số giấy tờ...">
-      </div>
-      <div>
-        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Số người</label>
-        <select id="regPeople" class="input-field">
-          <option value="1">1 người</option>
-          <option value="2">2 người</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Phòng</label>
-        <input type="text" id="regRoom" class="input-field" readonly>
-      </div>
-      <div style="display:flex; gap:5px;">
-        <div style="flex:1;">
-          <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Giờ đến</label>
-          <input type="text" id="regTimeIn" class="input-field" readonly>
-        </div>
-        <div style="flex:1;">
-          <label style="font-size:12px; font-weight:bold; color:#1e3a52;">Giờ đi</label>
-          <input type="text" id="regTimeOut" class="input-field" readonly>
-        </div>
-      </div>
-    </div>
-  </div>
-  
- 
-  <button class="btn-base secondary" id="confirmRegisterBtn" style="margin-top:5px; width:100%; border:1px solid #2c6e9e;">Đối chiếu & Xác nhận</button>
-<!-- NÚT BILL (Ẩn lúc đầu) -->
-<button class="btn-base" id="showBillBtn" style="margin-top:5px; width:100%; display:none; background:#e67e22; box-shadow:0 4px 0 #a04000;">🧾 Xem Hóa Đơn Thanh Toán</button>
-</div>
-        
-        <!-- Tab Sơ đồ phòng -->
-        <div class="tab-content active" id="tab-dashboard">
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; font-weight:bold; color:#1e3a52;">
-            <span>Đang có khách: <span id="dash-occupied" style="color:#ef4444;">0 / 30</span></span>
-            <span>Doanh thu: <span id="dash-revenue" style="color:#2c6e9e;">0đ</span></span>
-          </div>
-          <div class="rooms" id="dash-room-grid"></div>
-        </div>
-
-        <!-- Tab Sao kê -->
-        <div class="tab-content" id="tab-receipt">
-          <div style="display:flex; justify-content:space-between; background:#f0f4f8; padding:10px; border-radius:8px; margin-bottom:10px; font-weight:bold; color:#1e3a52;">
-            <span>Khách sạn thu: <span id="bill-total" style="color:#2c6e9e;">0đ</span></span>
-            <span>Bạn nhận (40%): <span id="bill-comm" style="color:#e67e22;">0đ</span></span>
-          </div>
-          <div id="receipt-list" style="max-height:200px; overflow-y:auto;">
-            <p style="text-align:center; color:#888; font-size:12px; margin-top:20px;">Chưa có giao dịch nào.</p>
-          </div>
-        </div>
-
-        <!-- Tab Tin nhắn -->
-        <div class="tab-content" id="tab-messages">
-          <div class="msg"><div class="avatar">Q</div><div class="body"><div class="name">Quản lý</div><div class="text">Nhớ kiểm tra kỹ sơ đồ phòng trên máy tính nhé.</div></div><div class="time">08:00</div></div>
-        </div>
-        
-        <div class="panel-actions" style="justify-content:center;">
-          <button class="btn-base secondary" id="closeComputer">← Đóng</button>
-        </div>
-      </div>
-    </section>
 
     <!-- Bảng Kệ Chìa Khóa -->
     <section class="panel" id="keyPanel">
       <div class="window">
         <h2>🗝️ KỆ CHÌA KHÓA</h2>
-        <p>Chọn phòng để nhận khách (Thu 500.000đ / Hoa hồng 40%)</p>
         <div class="rooms" id="rooms"></div>
         
         <!-- Bảng chọn gói cước -->
@@ -229,25 +355,27 @@
       </div>
     </section>
 
-    <!-- Bảng Cá Nhân -->
-    <section class="panel" id="profilePanel">
-      <div class="window" style="width:min(400px,100%);">
-        <h2>👤 THÔNG TIN CÁ NHÂN</h2>
-        <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
-          <div>
-            <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Tên hiển thị</label>
-            <input type="text" id="inputName" class="input-field" value="Minh">
-          </div>
-          <div style="background:#d4e2ed; padding:10px; border-radius:8px; display:flex; justify-content:space-between;">
-            <b>Cấp độ (LV):</b> <span style="color:#2c6e9e; font-weight:900;">1</span>
-          </div>
-        </div>
-        <div class="panel-actions" style="margin-top:20px;">
-          <button class="btn-base secondary" id="closeProfile">← Đóng</button>
-          <button class="btn-base" id="saveProfile">Lưu thay đổi</button>
-        </div>
+  <!-- Bảng Cá Nhân -->
+<section class="panel" id="profilePanel" style="z-index: 10005;">
+  <div class="window" style="width:min(400px,100%);">
+    <h2>👤 THÔNG TIN CÁ NHÂN</h2>
+    <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+      <div>
+        <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Tên hiển thị</label>
+        <input type="text" id="inputName" class="input-field" value="Minh">
       </div>
-    </section>
+      <div style="background:#d4e2ed; padding:10px; border-radius:8px; display:flex; justify-content:space-between;">
+        <b>Cấp độ (LV):</b> <span style="color:#2c6e9e; font-weight:900;">1</span>
+      </div>
+    </div>
+    
+    <!-- Thanh nút bấm của Cá nhân (Đã sửa lại) -->
+    <div class="panel-actions" style="margin-top:20px;">
+      <button class="btn-base secondary" id="closeProfile">← Đóng</button>
+      <button class="btn-base" id="saveProfile">Lưu thay đổi</button>
+    </div>
+  </div>
+</section>
 
     <!-- Bảng Hướng Dẫn / Cập Nhật (Dùng chung) -->
     <section class="panel" id="guidePanel">
@@ -301,6 +429,7 @@
 <!-- 3. GỌI CÁC FILE JAVASCRIPT -->
 <!-- ========================================== -->
 <script src="changelog.js"></script>
+<script src="draw_guests.js"></script> <!-- THÊM DÒNG NÀY -->
 <script src="script.js"></script>
 </body>
 </html>
