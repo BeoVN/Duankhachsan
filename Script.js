@@ -60,41 +60,85 @@ function spawnGuest() {
     { type: "Phòng Đơn", floor: 2 }, { type: "Phòng Đôi", floor: 3 }, { type: "Phòng VIP", floor: 4 },
     { type: "Phòng Lãng Mạn", floor: 5 }, { type: "Phòng Tổng Thống", floor: 6 }
   ];
-  const isCouple = Math.random() > 0.5;
-  let req = isCouple ? allRooms.slice(1)[Math.floor(Math.random() * 4)] : allRooms[Math.floor(Math.random() * 5)];
+  
+  // Random số người: 1, 2, 3, hoặc 4 người
+  const groupSize = Math.floor(Math.random() * 4) + 1; 
+  // Nếu 1 người thì ưu tiên phòng đơn/đôi, nếu nhóm đông thì ưu tiên phòng to
+  let req = allRooms[Math.floor(Math.random() * allRooms.length)];
   
   const lastNames = ["Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Huỳnh", "Phan", "Vũ", "Võ", "Đặng"];
   const maleNames = ["Anh", "Bình", "Cường", "Dũng", "Hải", "Hùng", "Khánh", "Long", "Nam", "Phong"];
   const femaleNames = ["Anh", "Hoa", "Lan", "Linh", "Mai", "Nga", "Ngọc", "Nhung", "Oanh", "Thảo"];
   
-  const createPerson = (isMale) => {
+  const createPerson = (isMale, forcedAge = null) => {
     const ho = lastNames[Math.floor(Math.random() * lastNames.length)];
     const ten = isMale ? maleNames[Math.floor(Math.random() * maleNames.length)] : femaleNames[Math.floor(Math.random() * femaleNames.length)];
-    return { name: ho + " " + ten, isMale: isMale };
+    // Nếu không bị ép tuổi (dành cho trẻ em), người lớn sẽ từ 18-60 tuổi
+    const age = forcedAge !== null ? forcedAge : Math.floor(Math.random() * 42) + 18;
+    const idCard = "0" + Math.floor(Math.random() * 90000000000 + 10000000000);
+    return { name: ho + " " + ten, isMale: isMale, age: age, idCard: idCard };
   };
 
-  let guestsList = isCouple ? [createPerson(true), createPerson(false)] : [createPerson(Math.random() > 0.5)];
-  const displayName = guestsList.length > 1 ? `${guestsList[0].name} & ${guestsList[1].name}` : guestsList[0].name;
+  let guestsList = [];
+  
+  if (groupSize === 1) {
+    // Đi 1 mình: Bắt buộc >= 18 tuổi
+    guestsList.push(createPerson(Math.random() > 0.5));
+  } else {
+    // Đi nhóm: Có ít nhất 1 người lớn, những người còn lại có thể là trẻ em
+    // Người đầu tiên (người đại diện) luôn >= 18 tuổi
+    guestsList.push(createPerson(Math.random() > 0.5)); 
+    
+    // Những người tiếp theo
+    for (let i = 1; i < groupSize; i++) {
+      // 50% cơ hội là trẻ em dưới 18 tuổi, 50% là người lớn
+      if (Math.random() > 0.5) {
+        const childAge = Math.floor(Math.random() * 12) + 6; // 6 - 17 tuổi
+        guestsList.push(createPerson(Math.random() > 0.5, childAge));
+      } else {
+        guestsList.push(createPerson(Math.random() > 0.5)); // Người lớn
+      }
+    }
+  }
+
+  const displayName = guestsList.map(g => g.name).join(" & ");
 
   currentGuest = { guests: guestsList, reqType: req.type, reqFloor: req.floor, rentType: 'hour', displayName: displayName };
   draw(); 
   
   setTimeout(() => { if (currentGuest) startConversation(); }, 500);
 }
+
 function drawGuest() {
   if (!currentGuest || currentFloor !== 1) return;
   const g = currentGuest;
-  const baseX = 200; const gy = 420; 
+  const baseX = 200; // Tọa độ X gốc (bên trái quầy)
+  const gy = 420;    // Tọa độ Y (chân khách)
   
-  if (g.guests.length === 1) { 
-    drawGuestAtReception(baseX + 50, gy, g.guests[0]); 
+  const numGuests = g.guests.length;
+  
+  // Tính toán vị trí X cho từng người để dàn đều
+  if (numGuests === 1) {
+    drawGuestAtReception(baseX + 50, gy, g.guests[0]);
   } 
-  else { 
+  else if (numGuests === 2) {
     drawGuestAtReception(baseX - 20, gy, g.guests[0]); 
     drawGuestAtReception(baseX + 110, gy, g.guests[1]); 
   }
+  else if (numGuests === 3) {
+    // Dàn rộng 3 người ra
+    drawGuestAtReception(baseX - 60, gy, g.guests[0]); 
+    drawGuestAtReception(baseX + 60, gy, g.guests[1]); 
+    drawGuestAtReception(baseX + 180, gy, g.guests[2]); 
+  }
+  else if (numGuests === 4) {
+    // Dàn rộng 4 người ra
+    drawGuestAtReception(baseX - 80, gy, g.guests[0]); 
+    drawGuestAtReception(baseX + 20, gy, g.guests[1]); 
+    drawGuestAtReception(baseX + 120, gy, g.guests[2]); 
+    drawGuestAtReception(baseX + 220, gy, g.guests[3]); 
+  }
 }
-
 
 // ==========================================
 // 3. VẼ CẢNH CHÍNH
@@ -125,13 +169,16 @@ function draw(){
     box(650, 360, 160, 20, '#34495e');
     label('HOTEL OS', 730, 375, 12, '#ecf0f1', 'center'); label('Sẵn sàng', 730, 400, 11, '#2c3e50', 'center');
     box(710, 470, 40, 10, '#2c3e50'); box(680, 478, 100, 10, '#1a252f');
-    box(380, 440, 200, 40, '#4a2e14'); box(380, 435, 200, 8, '#6e4723');
-    for(let i=0; i<6; i++){
-      const kx = 390 + i*30;
-      box(kx, 448, 24, 24, '#f4ebd9'); box(kx+8, 451, 8, 12, '#e5c07b');
-      label(String(101+i), kx+12, 466, 9, '#4a2e14', 'center');
-    }
-    label('QUẦY LỄ TÂN', 480, 540, 18, '#e8d5b5', 'center');
+  // Kệ chìa khóa (Đã dời xuống 5px)
+box(380, 505, 200, 40, '#4a2e14'); 
+box(380, 500, 200, 8, '#6e4723');
+for(let i=0; i<6; i++){
+  const kx = 390 + i*30;
+  box(kx, 513, 24, 24, '#f4ebd9'); 
+  box(kx+8, 516, 8, 12, '#e5c07b');
+  label(String(101+i), kx+12, 531, 9, '#4a2e14', 'center');
+}
+label('QUẦY LỄ TÂN', 480, 585, 18, '#e8d5b5', 'center');
     drawGuest(); 
   } else {
     box(0, 0, 960, 600, '#94a3b8'); box(360, 0, 240, 600, '#991b1b'); box(370, 0, 220, 600, '#b91c1c'); 
@@ -170,17 +217,55 @@ function draw(){
         c.fillStyle = '#fbbf24'; c.beginPath(); c.arc(x + 85, y + 90, 15, 0, Math.PI * 2); c.fill();
       }
 
-      if (currentRoom.status === 'Có khách' && currentRoom.guests) {
-        const isCouple = currentRoom.guests.length > 1; 
-        const pX = currentRoom.guestPos;
-        if (pX === 'bed') {
-          if (isCouple) { drawGuestInRoom(x + 50, y + 60, currentRoom.guests[0]); drawGuestInRoom(x + 80, y + 60, currentRoom.guests[1]); } else { drawGuestInRoom(x + 60, y + 60, currentRoom.guests[0]); }
-        } else if (pX === 'desk') {
-          if (isCouple) { drawGuestInRoom(x + roomW - 50, y + 40, currentRoom.guests[0]); drawGuestInRoom(x + roomW - 70, y + 70, currentRoom.guests[1]); } else { drawGuestInRoom(x + roomW - 50, y + 40, currentRoom.guests[0]); }
-        } else {
-          if (isCouple) { drawGuestInRoom(x + roomW/2 - 20, y + roomH/2, currentRoom.guests[0]); drawGuestInRoom(x + roomW/2 + 20, y + roomH/2, currentRoom.guests[1]); } else { drawGuestInRoom(x + roomW/2, y + roomH/2, currentRoom.guests[0]); }
-        }
-      }
+    // --- VẼ KHÁCH BẰNG HÌNH ẢNH ---
+if (currentRoom.status === 'Có khách' && currentRoom.guests) {
+  const num = currentRoom.guests.length; 
+  const pX = currentRoom.guestPos; // Vị trí: bed, desk, center
+
+  if (pX === 'bed') {
+    // NẰM TRÊN GIƯỜNG (Xếp hàng dọc hoặc ngang tùy loại giường)
+    if (num === 1) { drawGuestInRoom(x + 60, y + 60, currentRoom.guests[0]); }
+    else if (num === 2) { drawGuestInRoom(x + 50, y + 60, currentRoom.guests[0]); drawGuestInRoom(x + 80, y + 60, currentRoom.guests[1]); }
+    else if (num === 3) { 
+      // 2 người nằm trên giường, 1 người nằm dưới
+      drawGuestInRoom(x + 40, y + 50, currentRoom.guests[0]); 
+      drawGuestInRoom(x + 80, y + 50, currentRoom.guests[1]); 
+      drawGuestInRoom(x + 60, y + 80, currentRoom.guests[2]); 
+    }
+    else if (num === 4) { 
+      // 4 người nằm thành 2 hàng
+      drawGuestInRoom(x + 40, y + 50, currentRoom.guests[0]); 
+      drawGuestInRoom(x + 80, y + 50, currentRoom.guests[1]); 
+      drawGuestInRoom(x + 40, y + 80, currentRoom.guests[2]); 
+      drawGuestInRoom(x + 80, y + 80, currentRoom.guests[3]); 
+    }
+  } 
+  else if (pX === 'desk') {
+    // LÀM VIỆC Ở BÀN
+    if (num === 1) { drawGuestInRoom(x + roomW - 50, y + 40, currentRoom.guests[0]); }
+    else if (num === 2) { drawGuestInRoom(x + roomW - 50, y + 40, currentRoom.guests[0]); drawGuestInRoom(x + roomW - 70, y + 70, currentRoom.guests[1]); }
+    else if (num === 3) { drawGuestInRoom(x + roomW - 40, y + 40, currentRoom.guests[0]); drawGuestInRoom(x + roomW - 70, y + 40, currentRoom.guests[1]); drawGuestInRoom(x + roomW - 55, y + 70, currentRoom.guests[2]); }
+    else if (num === 4) { drawGuestInRoom(x + roomW - 30, y + 40, currentRoom.guests[0]); drawGuestInRoom(x + roomW - 60, y + 40, currentRoom.guests[1]); drawGuestInRoom(x + roomW - 40, y + 70, currentRoom.guests[2]); drawGuestInRoom(x + roomW - 70, y + 70, currentRoom.guests[3]); }
+  } 
+  else {
+    // NGỒI TRÒ CHUYỆN GIỮA PHÒNG (Xếp thành vòng tròn hoặc đối diện nhau)
+    if (num === 1) { drawGuestInRoom(x + roomW/2, y + roomH/2, currentRoom.guests[0]); }
+    else if (num === 2) { drawGuestInRoom(x + roomW/2 - 30, y + roomH/2, currentRoom.guests[0]); drawGuestInRoom(x + roomW/2 + 30, y + roomH/2, currentRoom.guests[1]); }
+    else if (num === 3) { 
+      // 3 người tạo thành hình tam giác
+      drawGuestInRoom(x + roomW/2, y + roomH/2 - 30, currentRoom.guests[0]); 
+      drawGuestInRoom(x + roomW/2 - 30, y + roomH/2 + 20, currentRoom.guests[1]); 
+      drawGuestInRoom(x + roomW/2 + 30, y + roomH/2 + 20, currentRoom.guests[2]); 
+    }
+    else if (num === 4) { 
+      // 4 người ngồi đối diện nhau
+      drawGuestInRoom(x + roomW/2 - 30, y + roomH/2 - 20, currentRoom.guests[0]); 
+      drawGuestInRoom(x + roomW/2 + 30, y + roomH/2 - 20, currentRoom.guests[1]); 
+      drawGuestInRoom(x + roomW/2 - 30, y + roomH/2 + 20, currentRoom.guests[2]); 
+      drawGuestInRoom(x + roomW/2 + 30, y + roomH/2 + 20, currentRoom.guests[3]); 
+    }
+  }
+}
 
       if (currentRoom.status === 'Có khách' && currentRoom.checkOutTime > 0) {
         const timeLeft = currentRoom.checkOutTime - Date.now(); 
@@ -213,7 +298,7 @@ function resizeAll(){
   canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; canvas.style.left = (aw - w) / 2 + 'px'; canvas.style.top = ((ah - h) / 2 - 50) + 'px';
   const sx = w/960, sy = h/600; const ox = (aw - w) / 2, oy = (ah - h) / 2;
   if(computerBtn) { computerBtn.style.left = ox + 640*sx + 'px'; computerBtn.style.top = oy + 230*sy + 'px'; computerBtn.style.width = 180*sx + 'px'; computerBtn.style.height = 120*sy + 'px'; }
-  if(keysBtn) { keysBtn.style.left = ox + 380*sx + 'px'; keysBtn.style.top = oy + 315*sy + 'px'; keysBtn.style.width = 200*sx + 'px'; keysBtn.style.height = 40*sy + 'px'; }
+  if(keysBtn) { keysBtn.style.left = ox + 380*sx + 'px'; keysBtn.style.top = oy + 380*sy + 'px'; keysBtn.style.width = 200*sx + 'px'; keysBtn.style.height = 40*sy + 'px'; }
   draw();
 }
 
@@ -307,62 +392,127 @@ function handleChatAction() {
       
       currentGuest.rentType = rentType; currentGuest.stayHours = hoursToStay; guestStayHours = hoursToStay;
       addChatMessage(currentGuest.displayName, guestReply, '#1e3a52', 'left');
-      btn.disabled = false; btn.style.opacity = '1'; btn.innerText = "Xin CCCD & Tuổi"; chatStep = 3;
+      btn.disabled = false; btn.style.opacity = '1'; btn.innerText = "Xin CCCD"; chatStep = 3;
     }, 500); 
   } 
-  else if (chatStep === 3) {
+else if (chatStep === 3) {
+  if (currentGuest.guests.length === 1) {
     addChatMessage("Lễ tân", "Vui lòng cho tôi xin số Căn cước công dân và số tuổi của bạn.", '#e67e22', 'right');
-    setTimeout(() => {
-      const idCard = "0" + Math.floor(Math.random() * 90000000000 + 10000000000);
-   const age = Math.floor(Math.random() * 55) + 6; // Random từ 6 đến 60 tuổi
-      currentGuest.idCard = idCard; currentGuest.age = age;
-      addChatMessage(currentGuest.displayName, `CCCD của tôi là: ${idCard}, năm nay tôi ${age} tuổi.`, '#1e3a52', 'left');
-
-      const now = new Date(gameTime); 
-      const timeInStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}`;
-      let outTime;
-      if (currentGuest.rentType === 'night') {
-        outTime = new Date(now); outTime.setDate(outTime.getDate() + 1); outTime.setHours(7, 0, 0, 0); 
-      } else {
-        outTime = new Date(now.getTime() + (currentGuest.stayHours * 60 * 60000)); 
-      }
-      const timeOutStr = `${outTime.getHours().toString().padStart(2, '0')}:${outTime.getMinutes().toString().padStart(2, '0')} - ${outTime.getDate()}/${outTime.getMonth() + 1}`;
-      
-      currentGuest.timeIn = timeInStr; currentGuest.timeOut = timeOutStr; currentGuest.outTimeObj = outTime;
-
-      document.getElementById('guestSaidName').innerText = currentGuest.displayName;
-      document.getElementById('guestSaidReq').innerText = currentGuest.reqType + ` (${currentGuest.rentType === 'hour' ? 'Theo giờ' : currentGuest.rentType === 'night' ? 'Qua đêm' : 'Dài hạn'})`;
-      document.getElementById('guestSaidTime').innerText = currentGuest.stayHours + " giờ";
-      document.getElementById('guestSaidId').innerText = currentGuest.idCard;
-
-      const availableRoom = roomState.find(r => Math.floor(r.number / 100) === currentGuest.reqFloor && r.status === 'Trống');
-      document.getElementById('regRoom').value = availableRoom ? `Phòng ${availableRoom.number}` : "Hết phòng!";
-      document.getElementById('regName').value = currentGuest.displayName;
-      document.getElementById('regAge').value = currentGuest.age;
-      document.getElementById('regId').value = currentGuest.idCard;
-      document.getElementById('regPeople').value = currentGuest.guests.length;
-      document.getElementById('regTimeIn').value = currentGuest.timeIn;
-      document.getElementById('regTimeOut').value = currentGuest.timeOut;
-      
-      btn.style.display = 'none';
-      document.getElementById('openComputerFromChatBtn').style.display = 'block';
-      document.getElementById('openComputerFromChatBtn').innerText = "💻 Mở Đăng ký trong Máy tính";
-    }, 500); 
+  } else {
+    addChatMessage("Lễ tân", "Cho em xin Căn cước công dân của mọi người trong đoàn ạ.", '#e67e22', 'right');
   }
+  
+  setTimeout(() => {
+    // Tạo CCCD ngẫu nhiên cho những người >= 18 tuổi
+    currentGuest.guests.forEach((g) => {
+      if (g.age >= 18) {
+        g.idCard = "0" + Math.floor(Math.random() * 90000000000 + 10000000000);
+      } else {
+        g.idCard = "Chưa có"; // Dưới 18 tuổi không có CCCD
+      }
+    });
+
+    const leader = currentGuest.guests[0];
+    let replyText = "";
+    if (currentGuest.guests.length === 1) {
+       replyText = `CCCD của tôi là: ${leader.idCard}, năm nay tôi ${leader.age} tuổi.`;
+    } else {
+       replyText = `Dạ đây ạ, tụi em có ${currentGuest.guests.length} người.`;
+    }
+    addChatMessage(currentGuest.displayName, replyText, '#1e3a52', 'left');
+
+    // Hiển thị Form tương ứng
+    document.querySelectorAll('.guest-form').forEach(f => f.style.display = 'none');
+    document.getElementById('form-' + currentGuest.guests.length).style.display = 'flex';
+
+    // Cập nhật khung Thông tin CCCD ở trên cùng
+    const cccdDetails = document.getElementById('cccdDetails');
+    cccdDetails.innerHTML = '';
+    currentGuest.guests.forEach((g, index) => {
+      cccdDetails.innerHTML += `<div style="border-bottom:1px dashed #ccc; padding-bottom:3px;">
+        <b>Người ${index + 1}:</b> ${g.name} - ${g.age} tuổi - CCCD: ${g.idCard}
+      </div>`;
+    });
+
+    // Điền thông tin vào 4 form
+   const size = currentGuest.guests.length;
+currentGuest.guests.forEach((g, index) => {
+  const p = index + 1;
+  const nameEl = document.getElementById(`f${size}_p${p}_name`);
+  const ageEl = document.getElementById(`f${size}_p${p}_age`);
+  const idEl = document.getElementById(`f${size}_p${p}_id`);
+      if(nameEl && ageEl && idEl) {
+        nameEl.value = g.name;
+        ageEl.value = g.age;
+        idEl.value = g.idCard === "Chưa có" ? "" : g.idCard;
+        
+        // Khóa ô CCCD nếu dưới 18 tuổi
+        if (g.age < 18) { idEl.disabled = true; idEl.placeholder = "Chưa có"; }
+        else { idEl.disabled = false; idEl.placeholder = "Nhập CCCD..."; }
+      }
+    });
+
+  // Tính thời gian (giữ nguyên)
+const now = new Date(gameTime); 
+const timeInStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}`;
+let outTime;
+if (currentGuest.rentType === 'night') {
+  outTime = new Date(now); outTime.setDate(outTime.getDate() + 1); outTime.setHours(7, 0, 0, 0); 
+} else {
+  outTime = new Date(now.getTime() + (currentGuest.stayHours * 60 * 60000)); 
+}
+currentGuest.timeIn = timeInStr;
+currentGuest.timeOut = `${outTime.getHours().toString().padStart(2, '0')}:${outTime.getMinutes().toString().padStart(2, '0')} - ${outTime.getDate()}/${outTime.getMonth() + 1}`;
+
+// === TỰ ĐỘNG TÌM PHÒNG TRỐNG VÀ ĐIỀN VÀO Ô ===
+const availableRoom = roomState.find(r => Math.floor(r.number / 100) === currentGuest.reqFloor && r.status === 'Trống');
+document.getElementById('regRoom').value = availableRoom ? `Phòng ${availableRoom.number}` : "Hết phòng!";
+
+document.getElementById('regTimeIn').value = currentGuest.timeIn;
+document.getElementById('regTimeOut').value = currentGuest.timeOut;
+    
+    btn.style.display = 'none';
+    document.getElementById('openComputerFromChatBtn').style.display = 'block';
+    document.getElementById('openComputerFromChatBtn').innerText = "💻 Mở Đăng ký trong Máy tính";
+  }, 500); 
+}
 }
 
 function generateBill() {
   if (!currentGuest) return;
-  const name = document.getElementById('regName').value;
+  
+  const size = currentGuest.guests.length;
+  // Lấy thông tin người đại diện (Người 1)
+  const leaderName = document.getElementById(`f${size}_p1_name`).value;
   const roomBooked = document.getElementById('regRoom').value;
+
   const prices = ROOM_PRICES[currentGuest.reqType];
   let basePrice = prices[currentGuest.rentType];
-  if (currentGuest.guests.length > 1) { basePrice = basePrice * 2 * 0.7; }
-  const vat = basePrice * 0.1; const total = basePrice + vat;
+  
+  // Tính giá theo số người mới (x2 -10%, x3 -20%, x4 -30%)
+  let multiplier = 1;
+  let discount = 0;
+  if (size === 2) { multiplier = 2; discount = 0.1; }
+  else if (size === 3) { multiplier = 3; discount = 0.2; }
+  else if (size === 4) { multiplier = 4; discount = 0.3; }
+  
+  basePrice = basePrice * multiplier * (1 - discount);
+  
+  const vat = basePrice * 0.1; 
+  const total = basePrice + vat;
 
-  currentBillData = { name: name, room: roomBooked, basePrice: basePrice, vat: vat, total: total };
+  currentBillData = {
+    name: leaderName, 
+    room: roomBooked, 
+    inTime: currentGuest.timeIn, 
+    outTime: currentGuest.timeOut,
+    basePrice: basePrice, 
+    vat: vat, 
+    total: total, 
+    rentType: currentGuest.rentType
+  };
 
-  document.getElementById('billName').innerText = name;
+  // Điền thông tin lên Bill
   document.getElementById('billRoom').innerText = roomBooked;
   document.getElementById('billIn').innerText = currentGuest.timeIn;
   document.getElementById('billOut').innerText = currentGuest.timeOut;
@@ -370,6 +520,7 @@ function generateBill() {
   document.getElementById('billVat').innerText = vat.toLocaleString('vi-VN') + 'đ';
   document.getElementById('billTotal').innerText = total.toLocaleString('vi-VN') + 'đ';
 
+  // CHỈ MỞ BILL
   document.getElementById('billPanel').classList.add('show');
 }
 // ==========================================
@@ -430,9 +581,10 @@ canvas.addEventListener('click', (e) => {
   
   // 3. Nút Mở Máy Tính Từ Hội Thoại
   document.getElementById('openComputerFromChatBtn').onclick = () => {
-    document.getElementById('computerTabs').style.display = 'none'; 
-    document.getElementById('guestSummaryBox').style.display = 'block'; 
-    document.getElementById('confirmRegisterBtn').style.display = 'block'; 
+  document.getElementById('computerTabs').style.display = 'none'; 
+  document.getElementById('guestSummaryBox').style.display = 'block'; // Hiện khung CCCD
+  document.getElementById('confirmRegisterBtn').style.display = 'block'; 
+  // ... (các dòng còn lại giữ nguyên)
     document.getElementById('showBillBtn').style.display = 'none'; 
     document.getElementById('closeComputer').style.display = 'none'; 
     
@@ -447,16 +599,30 @@ canvas.addEventListener('click', (e) => {
   };
 
   // 4. Nút Đối Chiếu
-  document.getElementById('confirmRegisterBtn').onclick = () => {
-    const name = document.getElementById('regName').value;
-    const roomBooked = document.getElementById('regRoom').value;
-    if (!name || !roomBooked || roomBooked === "Chưa xếp" || roomBooked === "Hết phòng!") {
-      showToast("Thông tin chưa chính xác hoặc đã hết phòng. Vui lòng sửa lại!"); return;
+ document.getElementById('confirmRegisterBtn').onclick = () => {
+  const size = currentGuest ? currentGuest.guests.length : 1;
+  let isValid = true;
+
+  // Kiểm tra xem tất cả mọi người đã nhập đủ Tên và Tuổi chưa
+  currentGuest.guests.forEach((g, index) => {
+    const p = index + 1;
+    const nameVal = document.getElementById(`f${size}_p${p}_name`).value;
+    const ageVal = document.getElementById(`f${size}_p${p}_age`).value;
+    
+    if (!nameVal || !ageVal) {
+      isValid = false;
     }
-    showToast("Đối chiếu thành công! Vui lòng bấm Xem Hóa Đơn.");
-    document.getElementById('showBillBtn').style.display = 'block'; 
-    document.getElementById('confirmRegisterBtn').style.display = 'none'; 
-  };
+  });
+
+  if (!isValid) {
+    showToast("Vui lòng kiểm tra lại Tên và Tuổi của tất cả khách!"); 
+    return;
+  }
+  
+  showToast("Đối chiếu thành công! Vui lòng bấm Xem Hóa Đơn.");
+  document.getElementById('showBillBtn').style.display = 'block'; 
+  document.getElementById('confirmRegisterBtn').style.display = 'none'; 
+};
 
   // 5. Nút Xem Bill
   document.getElementById('showBillBtn').onclick = generateBill;
@@ -567,69 +733,81 @@ canvas.addEventListener('click', (e) => {
   }
 
   // 12. Nút Nhận Phòng
-  document.getElementById('takeKey').onclick = () => { 
-    const roomIndex = selectedRoom - 1;
-    const room = roomState[roomIndex];
-    
-    if (!currentBillData) { showToast("Vui lòng làm thủ tục và thanh toán trên Máy tính trước!"); return; }
-    if (`Phòng ${room.number}` !== currentBillData.room) { showToast(`Khách đã thanh toán ${currentBillData.room}. Vui lòng chọn đúng phòng!`); return; }
-    if (room.status === 'Có khách') { showToast('Phòng này đang có khách rồi!'); return; }
-    if (room.status === 'Cần dọn') { showToast('Phòng này đang cần dọn dẹp!'); return; }
+document.getElementById('takeKey').onclick = () => { 
+  const roomIndex = selectedRoom - 1;
+  const room = roomState[roomIndex];
+  
+  // 1. Kiểm tra điều kiện
+  if (!currentBillData) { showToast("Vui lòng làm thủ tục và thanh toán trên Máy tính trước!"); return; }
+  if (`Phòng ${room.number}` !== currentBillData.room) { showToast(`Khách đã thanh toán ${currentBillData.room}. Vui lòng chọn đúng phòng!`); return; }
+  if (room.status === 'Có khách') { showToast('Phòng này đang có khách rồi!'); return; }
+  if (room.status === 'Cần dọn') { showToast('Phòng này đang cần dọn dẹp!'); return; }
 
-    const prices = ROOM_PRICES[currentGuest.reqType];
-    let finalPrice = prices[selectedRentType];
-    if (currentGuest.guests.length > 1) { finalPrice = finalPrice * 2 * 0.7; }
+  // 2. Tính tiền theo công thức mới
+  const prices = ROOM_PRICES[currentGuest.reqType];
+  let finalPrice = prices[selectedRentType];
+  
+  let multiplier = 1;
+  let discount = 0;
+  const size = currentGuest.guests.length;
+  if (size === 2) { multiplier = 2; discount = 0.1; }
+  else if (size === 3) { multiplier = 3; discount = 0.2; }
+  else if (size === 4) { multiplier = 4; discount = 0.3; }
+  
+  finalPrice = finalPrice * multiplier * (1 - discount);
 
-    const commission = finalPrice * COMMISSION_RATE;
-    const hotelKeep = finalPrice - commission;
-    
-    room.status = 'Có khách';
-    room.guests = currentGuest.guests;
-    room.stayHours = currentGuest.stayHours;
-    room.guestPos = 'center';
-    
-    const stayTimeInSeconds = currentGuest.stayHours * 12;
-    room.checkOutTime = Date.now() + (stayTimeInSeconds * 1000); 
-    
-    hotelMoney += hotelKeep; 
-    playerMoney += commission;
-    totalRevenue += finalPrice; 
-    occupiedRooms++;
-    updateMoneyUI();
-    
-    const list = document.getElementById('receipt-list');
-    if (list.innerHTML.includes('Chưa có giao dịch')) list.innerHTML = ''; 
-    const now = new Date();
-    const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-    list.insertAdjacentHTML('afterbegin', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${room.number}</b><br><span style="color:#888">${timeStr}</span></div><div style="text-align:right;"><div style="color:#2c6e9e;">KS thu: ${finalPrice.toLocaleString('vi-VN')}đ</div><div style="color:#e67e22;">Hoa hồng: +${commission.toLocaleString('vi-VN')}đ</div></div></div>`);
-    document.getElementById('bill-total').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
-    document.getElementById('bill-comm').innerText = playerMoney.toLocaleString('vi-VN') + 'đ';
+  const commission = finalPrice * COMMISSION_RATE;
+  const hotelKeep = finalPrice - commission;
+  
+  // 3. Cập nhật trạng thái phòng
+  room.status = 'Có khách';
+  room.guests = currentGuest.guests;
+  room.stayHours = currentGuest.stayHours;
+  room.guestPos = 'center';
+  
+  const stayTimeInSeconds = currentGuest.stayHours * 12;
+  room.checkOutTime = Date.now() + (stayTimeInSeconds * 1000); 
+  
+  // 4. Cộng tiền
+  hotelMoney += hotelKeep; 
+  playerMoney += commission;
+  totalRevenue += finalPrice; 
+  occupiedRooms++;
+  updateMoneyUI();
+  
+  // 5. Cập nhật Sao kê
+  const list = document.getElementById('receipt-list');
+  if (list.innerHTML.includes('Chưa có giao dịch')) list.innerHTML = ''; 
+  const now = new Date();
+  const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+  list.insertAdjacentHTML('afterbegin', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${room.number}</b><br><span style="color:#888">${timeStr}</span></div><div style="text-align:right;"><div style="color:#2c6e9e;">KS thu: ${finalPrice.toLocaleString('vi-VN')}đ</div><div style="color:#e67e22;">Hoa hồng: +${commission.toLocaleString('vi-VN')}đ</div></div></div>`);
+  document.getElementById('bill-total').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
+  document.getElementById('bill-comm').innerText = playerMoney.toLocaleString('vi-VN') + 'đ';
 
-    const checkInDiv = document.getElementById('diaryCheckIn');
-    if (checkInDiv.innerHTML.includes('Chưa có dữ liệu')) checkInDiv.innerHTML = '';
-    const logTimeStr = `${gameTime.getHours().toString().padStart(2, '0')}:${gameTime.getMinutes().toString().padStart(2, '0')} - ${gameTime.getDate()}/${gameTime.getMonth() + 1}`;
-    checkInDiv.insertAdjacentHTML('afterbegin', `<div style="padding:5px; border-bottom:1px dashed #ccc;"><b>Phòng ${room.number}</b> - ${logTimeStr}</div>`);
+  // 6. Ghi Nhật ký Nhận phòng
+  const checkInDiv = document.getElementById('diaryCheckIn');
+  if (checkInDiv.innerHTML.includes('Chưa có dữ liệu')) checkInDiv.innerHTML = '';
+  const logTimeStr = `${gameTime.getHours().toString().padStart(2, '0')}:${gameTime.getMinutes().toString().padStart(2, '0')} - ${gameTime.getDate()}/${gameTime.getMonth() + 1}`;
+  checkInDiv.insertAdjacentHTML('afterbegin', `<div style="padding:5px; border-bottom:1px dashed #ccc;"><b>Phòng ${room.number}</b> - ${logTimeStr}</div>`);
 
-    document.getElementById('keyPanel').classList.remove('show'); 
-    document.getElementById('rentOptions').style.display = 'none';
-    document.getElementById('computerPanel').classList.remove('show'); 
-    
-    currentGuest = null; 
-    currentBillData = null;
+  // 7. Dọn dẹp trạng thái
+  document.getElementById('keyPanel').classList.remove('show'); 
+  document.getElementById('rentOptions').style.display = 'none';
+  document.getElementById('computerPanel').classList.remove('show'); 
+  
+  currentGuest = null; 
+  currentBillData = null;
 
-    document.getElementById('regName').value = '';
-    document.getElementById('regId').value = '';
-    document.getElementById('regAge').value = '';
-    document.getElementById('regRoom').value = '';
-    document.getElementById('regTimeIn').value = '';
-    document.getElementById('regTimeOut').value = '';
-    
-    document.getElementById('takeKey').disabled = true;
-    document.getElementById('takeKey').style.opacity = '0.5';
+  document.getElementById('regRoom').value = '';
+  document.getElementById('regTimeIn').value = '';
+  document.getElementById('regTimeOut').value = '';
+  
+  document.getElementById('takeKey').disabled = true;
+  document.getElementById('takeKey').style.opacity = '0.5';
 
-    draw(); 
-    showToast(`Đã nhận phòng ${room.number} thành công!`);
-  };
+  draw(); 
+  showToast(`Đã nhận phòng ${room.number} thành công!`);
+};
 
   // 13. Thanh Điều Hướng Dưới Cùng
   navBtns.forEach(btn => {
