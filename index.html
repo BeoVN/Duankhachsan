@@ -51,7 +51,9 @@
   <!-- KHU VỰC SCENE (CANVAS VÀ CÁC LỚP ĐÈ LÊN) -->
   <main id="scene">
     <canvas id="view" width="960" height="600"></canvas>
-    
+    <!-- Nút bấm tiền mặt và mã QR (Ẩn mặc định) -->
+<button class="scene-btn" id="cashBtn" style="display:none; position:absolute; z-index:4;"></button>
+<button class="scene-btn" id="qrBtn" style="display:none; position:absolute; z-index:4;"></button>
     <!-- Đồng hồ và Lịch -->
     <div id="clockWidget" style="position:absolute; left:50%; transform:translateX(-50%); top:10px; z-index:5; background:rgba(255,255,255,0.9); padding:6px 20px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.2); border:2px solid #ffdc7a; color:#1e3a52; font-weight:900; font-size:16px; text-align:center; display:flex; flex-direction:column; line-height:1.2;">
   <span id="clockTime">00h00p</span>
@@ -295,20 +297,34 @@
 
 <!-- BẢNG HÓA ĐƠN (BILL) -->
 <section class="panel" id="billPanel" style="z-index: 10000;">
-  <div class="window" style="width:min(400px,100%); background:#fff; color:#253548;">
-    <h2 style="color:#2c6e9e; border-bottom:2px dashed #ccc; padding-bottom:10px;">🧾 HÓA ĐƠN THANH TOÁN</h2>
+  <div class="window" style="width:min(400px,100%); background:#fff; color:#253548; max-height: 90dvh; display: flex; flex-direction: column;">
+  <h2 style="color:#2c6e9e; border-bottom:2px dashed #ccc; padding-bottom:10px; flex-shrink: 0; margin-top:0;">🧾 HÓA ĐƠN THANH TOÁN</h2>
+  
+  <!-- BỌC PHẦN CHI TIẾT VÀO ĐÂY ĐỂ CHO PHÉP CUỘN -->
+  <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
     <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; font-size:14px;">
-      
       <div style="display:flex; justify-content:space-between;"><span>Phòng:</span> <b id="billRoom">---</b></div>
+      <div style="display:flex; justify-content:space-between; color:#555;"><span>Loại phòng:</span> <span id="billType">---</span></div>
+      <div style="display:flex; justify-content:space-between; color:#555;"><span>Số người:</span> <span id="billPeople">---</span></div>
+      <div style="display:flex; justify-content:space-between; color:#555;"><span>Hình thức thuê:</span> <span id="billRentType">---</span></div>
       <div style="display:flex; justify-content:space-between;"><span>Đến:</span> <b id="billIn">---</b></div>
       <div style="display:flex; justify-content:space-between;"><span>Đi:</span> <b id="billOut">---</b></div>
-      <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #eee; padding-top:10px;"><span>Tiền phòng:</span> <b id="billPrice">0đ</b></div>
+      
+      <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
+        <span style="flex:1;">Tiền phòng:</span> 
+        <span id="billCalcDetail" style="font-size:12px; color:#888; text-align:right; margin-right:10px; line-height:1.2;"></span>
+        <b id="billPrice" style="white-space:nowrap;">0đ</b>
+      </div>
+      
       <div style="display:flex; justify-content:space-between;"><span>VAT (10%):</span> <b id="billVat">0đ</b></div>
       <div style="display:flex; justify-content:space-between; font-size:16px; color:#d28a43; margin-top:5px; border-top:1px solid #eee; padding-top:10px;"><span>Thành tiền:</span> <b id="billTotal">0đ</b></div>
     </div>
-    <div class="panel-actions" style="justify-content:center; margin-top:20px;">
-      <button class="btn-base" id="payBillBtn" style="width:100%;">Xác nhận thanh toán</button>
-    </div>
+  </div>
+
+  <!-- NÚT THANH TOÁN LUÔN CỐ ĐỊNH Ở DƯỚI -->
+  <div class="panel-actions" style="justify-content:center; margin-top:15px; flex-shrink: 0; border-top: 1px dashed #ccc; padding-top: 15px;">
+    <button class="btn-base" id="payBillBtn" style="width:100%;">In Hóa Đơn & Đưa Khách</button>
+  </div>
   </div>
 </section>
 
@@ -360,13 +376,28 @@
   <div class="window" style="width:min(400px,100%);">
     <h2>👤 THÔNG TIN CÁ NHÂN</h2>
     <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
-      <div>
-        <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Tên hiển thị</label>
-        <input type="text" id="inputName" class="input-field" value="Minh">
-      </div>
-      <div style="background:#d4e2ed; padding:10px; border-radius:8px; display:flex; justify-content:space-between;">
-        <b>Cấp độ (LV):</b> <span style="color:#2c6e9e; font-weight:900;">1</span>
-      </div>
+  <div>
+    <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Tên hiển thị</label>
+    <input type="text" id="inputName" class="input-field" value="Minh">
+  </div>
+  
+  <!-- THÊM 2 Ô NÀY VÀO -->
+  <div>
+    <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Tuổi</label>
+    <input type="number" id="inputAge" class="input-field" value="25">
+  </div>
+  <div>
+    <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Giới tính</label>
+    <select id="inputGender" class="input-field">
+      <option value="Nam">Nam</option>
+      <option value="Nữ">Nữ</option>
+    </select>
+  </div>
+  <!-- ----------------- -->
+
+  <div style="background:#d4e2ed; padding:10px; border-radius:8px; display:flex; justify-content:space-between;">
+    <b>Cấp độ (LV):</b> <span style="color:#2c6e9e; font-weight:900;">1</span>
+  </div>
     </div>
     
     <!-- Thanh nút bấm của Cá nhân (Đã sửa lại) -->

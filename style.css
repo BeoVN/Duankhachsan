@@ -108,3 +108,27 @@ button:active{transform:translateY(3px);box-shadow:0 1px 0 #293d51}
   padding-top: 10px;
   border-top: 1px solid #cbd5e1; /* Tạo đường kẻ ngăn cách nhẹ */
 }
+/* Chỉnh riêng cho bảng Bill để không bị mất nút thanh toán */
+#billPanel .window {
+  max-height: 90vh; /* Không bao giờ cao quá 90% màn hình */
+  display: flex;
+  flex-direction: column;
+}
+
+#billPanel h2 {
+  flex: none; /* Tiêu đề không bị co lại */
+}
+
+#billPanel > .window > div:nth-child(2) {
+  /* Phần nội dung chi tiết (thông tin, tiền) */
+  flex: 1; /* Chiếm toàn bộ khoảng trống */
+  overflow-y: auto; /* Cho phép cuộn lên xuống nếu nội dung dài */
+  padding-right: 5px; /* Tránh thanh cuộn đè lên chữ */
+}
+
+#billPanel .panel-actions {
+  flex: none; /* Nút thanh toán luôn cố định ở dưới */
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #ccc;
+}
