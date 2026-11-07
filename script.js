@@ -15,7 +15,7 @@ let toastTimer;
 let chatStep = 0;
 let guestStayHours = 0;
 let currentBillData = null;
-
+let cashGivenAmount = 0;
 let hotelMoney = 500000;
 let playerMoney = 0; 
 let totalRevenue = 0;
@@ -220,11 +220,13 @@ function draw(){
     box(650, 360, 160, 20, '#34495e');
     label('HOTEL OS', 730, 375, 12, '#ecf0f1', 'center'); label('Sẵn sàng', 730, 400, 11, '#2c3e50', 'center');
     box(710, 470, 40, 10, '#2c3e50'); box(680, 478, 100, 10, '#1a252f');
-// Vẽ xấp tiền (Bên trái, to hơn)
-box(230, 440, 70, 35, '#2ecc71'); // Thân xấp tiền
-box(235, 430, 60, 15, '#27ae60'); // Cạnh trên
-box(240, 435, 50, 5, '#1e8449');  // Dây buộc
-label('$', 265, 465, 20, '#fff', 'center');
+// Vẽ Két thu ngân to, rõ nét (Dưới máy tính)
+box(640, 495, 180, 45, '#1f2937'); // Thân két màu đen xám
+box(645, 500, 170, 35, '#374151'); // Ngăn kéo két
+box(725, 510, 10, 15, '#fbbf24'); // Tay nắm màu vàng
+box(692, 528, 76, 5, '#111827'); // Đế két
+
+
 
 // Vẽ mã QR (Bên phải, chi tiết hơn)
 box(560, 440, 50, 50, '#fff'); // Nền trắng
@@ -357,22 +359,30 @@ function resizeAll(){
   const sx = w/960, sy = h/600; const ox = (aw - w) / 2, oy = (ah - h) / 2;
   if(computerBtn) { computerBtn.style.left = ox + 640*sx + 'px'; computerBtn.style.top = oy + 230*sy + 'px'; computerBtn.style.width = 180*sx + 'px'; computerBtn.style.height = 120*sy + 'px'; }
   if(keysBtn) { keysBtn.style.left = ox + 380*sx + 'px'; keysBtn.style.top = oy + 375*sy + 'px'; keysBtn.style.width = 200*sx + 'px'; keysBtn.style.height = 40*sy + 'px'; }
-// Căn vị trí nút Tiền mặt
-const cashBtn = document.getElementById('cashBtn');
-if(cashBtn) {
-  cashBtn.style.left = ox + 230*sx + 'px'; 
-  cashBtn.style.top = oy + 430*sy + 'px'; 
-  cashBtn.style.width = 70*sx + 'px'; 
-  cashBtn.style.height = 45*sy + 'px';
+// Căn vị trí Két sắt (đặt dưới máy tính)
+// Căn vị trí Két sắt
+// Căn vị trí Két sắt khớp với hình vẽ
+// Căn vị trí Két sắt (Rộng bằng màn hình máy tính)
+const cashDrawerBtn = document.getElementById('cashDrawerBtn');
+if(cashDrawerBtn) {
+  cashDrawerBtn.style.left = ox + 640*sx + 'px'; // Dời sang phải cho khớp màn hình
+  cashDrawerBtn.style.top = oy + 370*sy + 'px';  // Dời lên trên quầy gỗ
+  cashDrawerBtn.style.width = 180*sx + 'px';     // Rộng bằng màn hình máy tính (180)
+  cashDrawerBtn.style.height = 50*sy + 'px';     // Chiều cao vừa phải
+  // Viền đỏ nhấp nháy để bạn dễ thấy
+  cashDrawerBtn.style.border = '2px dashed #ef4444'; 
+  cashDrawerBtn.style.borderRadius = '6px';
 }
 
 // Căn vị trí nút QR
 const qrBtn = document.getElementById('qrBtn');
 if(qrBtn) {
   qrBtn.style.left = ox + 560*sx + 'px'; 
-  qrBtn.style.top = oy + 440*sy + 'px'; 
+  qrBtn.style.top = oy + 320*sy + 'px'; 
   qrBtn.style.width = 50*sx + 'px'; 
   qrBtn.style.height = 50*sy + 'px';
+ qrBtn.style.border = '2px dashed #ef4444'; 
+  qrBtn.style.borderRadius = '6px';
 }
   draw();
 }
@@ -748,36 +758,46 @@ function initUI() {
   // 7. Nút Xem Bill
   document.getElementById('showBillBtn').onclick = generateBill;
 
-  // 8. Nút In Hóa Đơn (trong Bill)
+// 8. Nút In Hóa Đơn & Đưa Khách (Trong Bill)
 document.getElementById('payBillBtn').onclick = () => {
   if (!currentBillData) return;
   
-  // Đóng Bill và Máy tính
+  // 1. Đóng Bill và Máy tính
   document.getElementById('billPanel').classList.remove('show');
   document.getElementById('computerPanel').classList.remove('show'); 
   
-  // Mở lại khung chat
+  // 2. Mở lại khung chat
   document.getElementById('chatBox').style.display = 'block';
   document.getElementById('chatActionBtn').style.display = 'none'; 
   
   let guestPronoun = getPronoun(currentGuest.guests[0]);
-  addChatMessage("Lễ tân", `Dạ ${guestPronoun} muốn thanh toán bằng tiền mặt hay quét mã QR ạ?`, '#e67e22', 'right');
+  let repPronoun = currentGuest.guests.length > 1 ? "Chúng tôi" : (guestPronoun.charAt(0).toUpperCase() + guestPronoun.slice(1));
   
-  // Khách random chọn Tiền mặt hoặc QR
+  addChatMessage("Lễ tân", `Dạ ${guestPronoun} cầm hóa đơn giúp em ạ.`, '#e67e22', 'right');
+  
   setTimeout(() => {
-    const isCash = Math.random() > 0.5; // 50% tiền mặt, 50% QR
+    addChatMessage("Người đại diện", `${repPronoun} cảm ơn.`, '#1e3a52', 'left');
     
-    if (isCash) {
-      addChatMessage("Người đại diện", "Tôi thanh toán bằng tiền mặt.", '#1e3a52', 'left');
-      document.getElementById('cashBtn').style.display = 'block'; 
-      showToast("Hãy chạm vào xấp tiền trên quầy để thu tiền!");
-    } else {
-      addChatMessage("Người đại diện", "Tôi quét mã QR.", '#1e3a52', 'left');
-      document.getElementById('qrBtn').style.display = 'block'; 
-      showToast("Hãy chạm vào mã QR trên quầy để khách quét!");
-    }
-  }, 800); // Đợi 0.8s cho tự nhiên
+    // 3. Hỏi thanh toán
+    setTimeout(() => {
+      addChatMessage("Lễ tân", `Dạ ${guestPronoun} muốn thanh toán bằng tiền mặt hay quét mã QR ạ?`, '#e67e22', 'right');
+      
+      setTimeout(() => {
+        const isCash = Math.random() > 0.5; 
+        if (isCash) {
+          addChatMessage("Người đại diện", `${repPronoun} thanh toán bằng tiền mặt.`, '#1e3a52', 'left');
+          document.getElementById('cashDrawerBtn').style.display = 'block'; 
+          showToast("Hãy chạm vào Két sắt để thu tiền!");
+        } else {
+          addChatMessage("Người đại diện", `${repPronoun} quét mã QR.`, '#1e3a52', 'left');
+          document.getElementById('qrBtn').style.display = 'block'; 
+          showToast("Hãy chạm vào mã QR trên quầy để khách quét!");
+        }
+      }, 1000);
+    }, 1000);
+  }, 1000);
 };
+
   document.getElementById('chatHistory').insertAdjacentHTML('beforeend', choiceHtml);
   
   // Xử lý khi chọn Tiền mặt
@@ -801,41 +821,6 @@ document.getElementById('payBillBtn').onclick = () => {
   };
 };
 
-// Xử lý khi chạm vào xấp tiền mặt trên quầy
-document.getElementById('cashBtn').onclick = () => {
-  document.getElementById('cashBtn').style.display = 'none'; // Ẩn nút tiền
-  addChatMessage("Lễ tân", "Cảm ơn bạn, tôi đã nhận đủ tiền.", '#e67e22', 'right');
-  
-  // Mở máy tính (thu ngân) để xác nhận
-  setTimeout(() => {
-    document.getElementById('computerPanel').classList.add('show');
-    document.getElementById('computerTabs').style.display = 'none';
-    document.getElementById('guestSummaryBox').style.display = 'none';
-    
-    // Chuyển sang tab Sao kê
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
-    document.querySelector('.tab[data-tab="receipt"]').classList.add('active');
-    document.getElementById('tab-receipt').classList.add('active');
-    
-    // Đợi 1.5s cho máy tính xử lý rồi hoàn tất
-    setTimeout(() => {
-      finishPayment();
-    }, 1500);
-  }, 500);
-};
-
-// Xử lý khi chạm vào mã QR trên quầy
-document.getElementById('qrBtn').onclick = () => {
-  document.getElementById('qrBtn').style.display = 'none'; // Ẩn nút QR
-  addChatMessage("Lễ tân", "Đã nhận được thanh toán qua mã QR.", '#e67e22', 'right');
-  showToast("Đang xử lý thanh toán...");
-  
-  // Đợi 1s cho khách quét mã rồi hoàn tất
-  setTimeout(() => {
-    finishPayment();
-  }, 1000);
-};
 
   // 9. Nút Máy Tính Ở Quầy
   computerBtn.onclick = () => { 
@@ -880,7 +865,135 @@ document.getElementById('qrBtn').onclick = () => {
       }
     }; 
   });
+// --- LOGIC KÉT TÍNH TIỀN ---
+document.getElementById('cashDrawerBtn').onclick = () => {
+  document.getElementById('cashDrawerBtn').style.display = 'none';
+  document.getElementById('chatBox').style.display = 'none';
+  
+  const total = currentBillData.total;
+  
+  // Tự động tính tiền khách đưa (vừa đủ hoặc dư)
+  let given = total;
+  const rand = Math.random();
+  if (rand < 0.4) given = total;
+  else if (rand < 0.7) given = Math.ceil(total / 10000) * 10000;
+  else given = Math.ceil(total / 100000) * 100000;
+  if (given < total) given = total;
+  
+  window.currentChangeNeeded = given - total; // Số tiền cần thối
+  window.currentChangeGiven = 0; // Số tiền đã bấm để thối
 
+  document.getElementById('cashTotal').innerText = total.toLocaleString('vi-VN') + 'đ';
+  document.getElementById('cashGiven').innerText = given.toLocaleString('vi-VN') + 'đ';
+  document.getElementById('cashChange').innerText = '0đ';
+  
+  const confirmBtn = document.getElementById('confirmCashBtn');
+  const missingEl = document.getElementById('cashMissing');
+  missingEl.style.display = 'block';
+  
+  // NẾU KHÁCH ĐƯA VỪA ĐỦ HOẶC DƯ (Không cần bấm thối tiền)
+  if (window.currentChangeNeeded === 0) {
+    missingEl.innerText = `Còn thiếu: 0đ`;
+    missingEl.style.color = '#4ade80';
+    confirmBtn.style.background = '#22c55e';
+    confirmBtn.style.boxShadow = '0 4px 0 #166534';
+    confirmBtn.style.pointerEvents = 'auto';
+    confirmBtn.innerText = "Thanh toán";
+  } else {
+    missingEl.innerText = `Còn thiếu: ${window.currentChangeNeeded.toLocaleString('vi-VN')}đ`;
+    missingEl.style.color = '#ef4444';
+    confirmBtn.style.background = '#ccc';
+    confirmBtn.style.boxShadow = '0 4px 0 #999';
+    confirmBtn.style.pointerEvents = 'none';
+    confirmBtn.innerText = "Chưa đủ tiền";
+  }
+
+  document.getElementById('cashierPanel').classList.add('show');
+};
+
+// Bấm nút mệnh giá để THỐI TIỀN
+document.querySelectorAll('.money-btn').forEach(btn => {
+  btn.onclick = () => {
+    const val = parseInt(btn.dataset.value);
+    window.currentChangeGiven += val; 
+    
+    document.getElementById('cashChange').innerText = window.currentChangeGiven.toLocaleString('vi-VN') + 'đ';
+    
+    const difference = window.currentChangeNeeded - window.currentChangeGiven; 
+    const confirmBtn = document.getElementById('confirmCashBtn');
+    const missingEl = document.getElementById('cashMissing');
+    
+    // LUÔN HIỂN THỊ
+    missingEl.style.display = 'block'; 
+    
+    if (difference > 0) {
+      missingEl.innerText = `Còn thiếu: ${difference.toLocaleString('vi-VN')}đ`;
+      missingEl.style.color = '#ef4444';
+      
+      confirmBtn.style.background = '#ccc';
+      confirmBtn.style.boxShadow = '0 4px 0 #999';
+      confirmBtn.style.pointerEvents = 'none';
+      confirmBtn.innerText = "Chưa đủ tiền";
+    } else {
+      missingEl.innerText = `Còn thiếu: 0đ`;
+      missingEl.style.color = '#4ade80';
+      
+      confirmBtn.style.background = '#22c55e';
+      confirmBtn.style.boxShadow = '0 4px 0 #166534';
+      confirmBtn.style.pointerEvents = 'auto';
+      confirmBtn.innerText = "Thanh toán";
+    }
+  };
+});
+
+// Nút Làm mới
+document.getElementById('resetCashBtn').onclick = () => {
+  window.currentChangeGiven = 0;
+  document.getElementById('cashChange').innerText = '0đ';
+  
+  const missingEl = document.getElementById('cashMissing');
+  const confirmBtn = document.getElementById('confirmCashBtn');
+  missingEl.style.display = 'block';
+  
+  if (window.currentChangeNeeded === 0) {
+    missingEl.innerText = `Còn thiếu: 0đ`;
+    missingEl.style.color = '#4ade80';
+    confirmBtn.style.background = '#22c55e';
+    confirmBtn.style.boxShadow = '0 4px 0 #166534';
+    confirmBtn.style.pointerEvents = 'auto';
+    confirmBtn.innerText = "Thanh toán";
+  } else {
+    missingEl.innerText = `Còn thiếu: ${window.currentChangeNeeded.toLocaleString('vi-VN')}đ`;
+    missingEl.style.color = '#ef4444';
+    confirmBtn.style.background = '#ccc';
+    confirmBtn.style.boxShadow = '0 4px 0 #999';
+    confirmBtn.style.pointerEvents = 'none';
+    confirmBtn.innerText = "Chưa đủ tiền";
+  }
+};
+
+// Nút thanh toán
+document.getElementById('confirmCashBtn').onclick = () => {
+  document.getElementById('cashierPanel').classList.remove('show');
+  document.getElementById('chatBox').style.display = 'block';
+  addChatMessage("Lễ tân", "Cảm ơn bạn, tôi đã nhận đủ tiền và thối lại.", '#e67e22', 'right');
+  
+  // Âm thầm lưu sao kê và mở kệ chìa khóa
+  setTimeout(() => {
+    finishPayment(); 
+  }, 500);
+};
+// Xử lý khi chạm vào mã QR trên quầy
+document.getElementById('qrBtn').onclick = () => {
+  document.getElementById('qrBtn').style.display = 'none'; 
+  addChatMessage("Lễ tân", "Đã nhận được thanh toán qua mã QR.", '#e67e22', 'right');
+  showToast("Đang xử lý thanh toán...");
+  
+  setTimeout(() => {
+    finishPayment(); // Gọi hàm thanh toán
+  }, 1000);
+};
+// --- KẾT THÚC LOGIC KÉT TÍNH TIỀN ---
   // 12. Các sự kiện khác (Lịch, Hướng dẫn, Cập nhật)
   document.getElementById('openCalendarBtn').onclick = () => { currentMonth = gameTime.getMonth(); currentYear = gameTime.getFullYear(); renderCalendar(); document.getElementById('calendarPanel').classList.add('show'); };
   document.getElementById('closeCalendar').onclick = () => document.getElementById('calendarPanel').classList.remove('show');
@@ -921,73 +1034,53 @@ document.getElementById('qrBtn').onclick = () => {
     document.getElementById('rentPriceDisplay').innerText = price.toLocaleString('vi-VN') + 'đ';
   }
 
-  // 14. Nút Nhận Phòng
-  document.getElementById('takeKey').onclick = () => { 
-    const roomIndex = selectedRoom - 1;
-    const room = roomState[roomIndex];
-    
-    if (!currentBillData) { showToast("Vui lòng làm thủ tục và thanh toán trên Máy tính trước!"); return; }
-    if (`Phòng ${room.number}` !== currentBillData.room) { showToast(`Khách đã thanh toán ${currentBillData.room}. Vui lòng chọn đúng phòng!`); return; }
-    if (room.status === 'Có khách') { showToast('Phòng này đang có khách rồi!'); return; }
-    if (room.status === 'Cần dọn') { showToast('Phòng này đang cần dọn dẹp!'); return; }
+ // 14. Nút Nhận Phòng
+document.getElementById('takeKey').onclick = () => { 
+  const roomIndex = selectedRoom - 1;
+  const room = roomState[roomIndex];
+  
+  // Kiểm tra an toàn
+  if (!currentBillData) { showToast("Vui lòng thanh toán trước khi nhận phòng!"); return; }
+  if (`Phòng ${room.number}` !== currentBillData.room) { showToast(`Khách đã thanh toán ${currentBillData.room}. Vui lòng chọn đúng phòng!`); return; }
+  if (room.status === 'Có khách') { showToast('Phòng này đang có khách rồi!'); return; }
+  if (room.status === 'Cần dọn') { showToast('Phòng này đang cần dọn dẹp!'); return; }
 
-    const prices = ROOM_PRICES[currentGuest.reqType];
-    let finalPrice = prices[selectedRentType];
-    
-    let multiplier = 1, discount = 0;
-    const size = currentGuest.guests.length;
-    if (size === 2) { multiplier = 2; discount = 0.1; }
-    else if (size === 3) { multiplier = 3; discount = 0.2; }
-    else if (size === 4) { multiplier = 4; discount = 0.3; }
-    finalPrice = finalPrice * multiplier * (1 - discount);
+  // Thiết lập phòng
+  room.status = 'Có khách';
+  room.guests = currentGuest.guests;
+  room.stayHours = currentGuest.stayHours;
+  room.guestPos = 'center';
+  room.checkOutTime = Date.now() + (currentGuest.stayHours * 12 * 1000); 
+  occupiedRooms++;
+  
+  // Ghi nhật ký
+  const checkInDiv = document.getElementById('diaryCheckIn');
+  if (checkInDiv.innerHTML.includes('Chưa có dữ liệu')) checkInDiv.innerHTML = '';
+  const logTimeStr = `${gameTime.getHours().toString().padStart(2, '0')}:${gameTime.getMinutes().toString().padStart(2, '0')} - ${gameTime.getDate()}/${gameTime.getMonth() + 1}`;
+  checkInDiv.insertAdjacentHTML('afterbegin', `<div style="padding:5px; border-bottom:1px dashed #ccc;"><b>Phòng ${room.number}</b> - ${logTimeStr}</div>`);
 
-    const commission = finalPrice * COMMISSION_RATE;
-    const hotelKeep = finalPrice - commission;
-    
-    room.status = 'Có khách';
-    room.guests = currentGuest.guests;
-    room.stayHours = currentGuest.stayHours;
-    room.guestPos = 'center';
-    
-    const stayTimeInSeconds = currentGuest.stayHours * 12;
-    room.checkOutTime = Date.now() + (stayTimeInSeconds * 1000); 
-    
-    hotelMoney += hotelKeep; 
-    playerMoney += commission;
-    totalRevenue += finalPrice; 
-    occupiedRooms++;
-    updateMoneyUI();
-    
-    const list = document.getElementById('receipt-list');
-    if (list.innerHTML.includes('Chưa có giao dịch')) list.innerHTML = ''; 
-    const now = new Date();
-    const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-    list.insertAdjacentHTML('afterbegin', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${room.number}</b><br><span style="color:#888">${timeStr}</span></div><div style="text-align:right;"><div style="color:#2c6e9e;">KS thu: ${finalPrice.toLocaleString('vi-VN')}đ</div><div style="color:#e67e22;">Hoa hồng: +${commission.toLocaleString('vi-VN')}đ</div></div></div>`);
-    document.getElementById('bill-total').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
-    document.getElementById('bill-comm').innerText = playerMoney.toLocaleString('vi-VN') + 'đ';
+  // Đóng kệ chìa khóa và reset mọi thứ
+  document.getElementById('keyPanel').classList.remove('show'); 
+  document.getElementById('computerPanel').classList.remove('show'); 
+  
+  currentGuest = null; 
+  currentBillData = null;
 
-    const checkInDiv = document.getElementById('diaryCheckIn');
-    if (checkInDiv.innerHTML.includes('Chưa có dữ liệu')) checkInDiv.innerHTML = '';
-    const logTimeStr = `${gameTime.getHours().toString().padStart(2, '0')}:${gameTime.getMinutes().toString().padStart(2, '0')} - ${gameTime.getDate()}/${gameTime.getMonth() + 1}`;
-    checkInDiv.insertAdjacentHTML('afterbegin', `<div style="padding:5px; border-bottom:1px dashed #ccc;"><b>Phòng ${room.number}</b> - ${logTimeStr}</div>`);
+  document.getElementById('regRoom').value = '';
+  document.getElementById('regTimeIn').value = '';
+  document.getElementById('regTimeOut').value = '';
+  
+  // Khóa lại nút chờ khách tiếp theo
+  document.getElementById('takeKey').disabled = true;
+  document.getElementById('takeKey').style.opacity = '0.5';
 
-    document.getElementById('keyPanel').classList.remove('show'); 
-    document.getElementById('rentOptions').style.display = 'none';
-    document.getElementById('computerPanel').classList.remove('show'); 
-    
-    currentGuest = null; 
-    currentBillData = null;
-
-    document.getElementById('regRoom').value = '';
-    document.getElementById('regTimeIn').value = '';
-    document.getElementById('regTimeOut').value = '';
-    
-    document.getElementById('takeKey').disabled = true;
-    document.getElementById('takeKey').style.opacity = '0.5';
-
-    draw(); 
-    showToast(`Đã nhận phòng ${room.number} thành công!`);
-  };
+  draw(); 
+ showToast(`Đã nhận phòng ${room.number} thành công!`);
+// Tự động ẩn khung hội thoại sau 1 giây
+setTimeout(() => {
+  document.getElementById('chatBox').style.display = 'none';
+}, 1000);
+};
 
   // 15. Thanh Điều Hướng Dưới Cùng
   navBtns.forEach(btn => {
@@ -1036,7 +1129,7 @@ document.getElementById('qrBtn').onclick = () => {
     }
     document.getElementById('profilePanel').classList.remove('show');
   };
-}
+
 
 // ==========================================
 // 6. HỆ THỐNG THỜI GIAN, LỊCH VÀ VÒNG LẶP
@@ -1095,6 +1188,44 @@ function renderCalendar() {
     }
     grid.appendChild(el);
   }
+}
+function finishPayment() {
+  if (!currentGuest || !currentBillData) return;
+
+  // Lấy chính xác số tiền Thành tiền (đã gồm VAT) từ Bill
+  const finalPrice = currentBillData.total;
+  
+  // Tính hoa hồng (40%) và tiền khách sạn giữ lại
+  const commission = finalPrice * COMMISSION_RATE;
+  const hotelKeep = finalPrice - commission;
+  
+  // Cộng tiền vào ví
+  hotelMoney += hotelKeep; 
+  playerMoney += commission;
+  totalRevenue += finalPrice; 
+  updateMoneyUI();
+  
+  // Ghi vào Sao kê
+  const list = document.getElementById('receipt-list');
+  if (list.innerHTML.includes('Chưa có giao dịch')) list.innerHTML = ''; 
+  const now = gameTime;
+  const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+  
+  list.insertAdjacentHTML('afterbegin', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${currentBillData.room.replace('Phòng ', '')}</b><br><span style="color:#888">${timeStr}</span></div><div style="text-align:right;"><div style="color:#2c6e9e;">KS thu: ${finalPrice.toLocaleString('vi-VN')}đ</div><div style="color:#e67e22;">Hoa hồng: +${commission.toLocaleString('vi-VN')}đ</div></div></div>`);
+  
+  document.getElementById('bill-total').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
+  document.getElementById('bill-comm').innerText = playerMoney.toLocaleString('vi-VN') + 'đ';
+
+  // Đóng máy tính, mở kệ chìa khóa
+  document.getElementById('computerPanel').classList.remove('show'); 
+  document.getElementById('keyPanel').classList.add('show');
+  renderRoomGrid('rooms');
+  
+  // Mở khóa nút nhận phòng
+  document.getElementById('takeKey').disabled = false;
+  document.getElementById('takeKey').style.opacity = '1';
+
+  showToast("Thanh toán thành công! Hãy chọn phòng trên Kệ chìa khóa.");
 }
 
 setInterval(() => {

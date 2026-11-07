@@ -17,8 +17,22 @@ function showChangelog() {
 
       <!-- PHIÊN BẢN MỚI NHẤT -->
 
+<details open>
+  <summary>Phiên bản 0.2.8 (Mới nhất)</summary>
+  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 01:30 - 08/11/2026</div>
+  <ul>
+    <li><b>Tất cả được tóm tắt bởi A.I</b></li>
+    <li>✅ <b>Hệ thống thu tiền mặt và mã qr:</b> Thêm Két sắt dưới màn hình máy tính. Hỗ trợ 9 mệnh giá tiền (từ 1k đến 500k) để tính toán tiền thối cho khách.</li>
+    <li>✅ <b>Logic thối tiền thông minh:</b> Khách có thể đưa vừa đủ hoặc dư tiền. Hệ thống hiển thị rõ "Còn thiếu" và tự động mở khóa nút "Thanh toán" ngay khi số tiền thối bằng 0.</li>
+    <li>✅ <b>Luồng thanh toán chuẩn xác:</b> Quy trình chặt chẽ: Hội thoại -> Đăng ký -> Đối chiếu -> Xuất Bill -> Đưa khách -> Thanh toán (Tiền mặt/QR) -> Nhận phòng.</li>
+    <li>✅ <b>Sửa lỗi Sao kê:</b> Số tiền trong tab Sao kê đã khớp 100% với Thành tiền trên Hóa đơn (bao gồm VAT). Thời gian ghi nhận cũng đã chuyển sang dùng giờ trong game.</li>
+    <li>✅ <b>Tối ưu giao diện Nhận phòng:</b> Đã xóa bỏ mục chọn hình thức thuê thừa thãi trong Kệ chìa khóa. Nút "Nhận phòng" tự động mở khóa sau khi thanh toán thành công.</li>
+    <li>✅ <b>Xưng hô tự động:</b> Sửa lỗi khách đi theo đoàn tự động xưng "Chúng tôi", khách đi lẻ xưng "Anh/Chị/Em" chuẩn xác theo ngữ cảnh.</li>
+    <li>✅ <b>Hiệu ứng & Trải nghiệm:</b> Khung hội thoại tự động đóng sau 1 giây khi nhận phòng xong. Khung thông báo (Toast) luôn hiển thị trên cùng (không bị che khuất).</li>
+  </ul>
+</details>
       <details open>
-  <summary>Phiên bản 0.2.6 (Mới nhất)</summary>
+  <summary>Phiên bản 0.2.6 </summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 20:00 - 05/11/2026</div>
   <ul>
   <li><b>Tất cả được tóm tắt bởi A.I</b></li>
