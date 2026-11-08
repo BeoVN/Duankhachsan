@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#172638">
-<title>Khách sạn của tôi - v0.2.8</title>
+<title>Khách sạn của tôi - v0.3.3</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,10 +17,25 @@
     <h1 class="game-title">KHÁCH SẠN<br>CỦA TÔI</h1>
     <p class="game-subtitle">Khách sạn của riêng bạn</p>
     <div class="menu-buttons">
-      <button class="btn-main" id="startBtn">▶ BẮT ĐẦU</button>
-      <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
-      <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.2.8)</button>
+  <button class="btn-main" id="startBtn">▶ BẮT ĐẦU</button>
+  <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
+  <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.3.3)</button>
+  
+  <!-- KHUNG THÔNG TIN NGƯỜI CHƠI -->
+  <div id="menuPlayerInfo" style="margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #456078; border-radius: 10px; text-align: left; font-size: 13px; color: #c9d8e6; display: flex; flex-direction: column; gap: 5px;">
+    <div style="display: flex; justify-content: space-between;">
+      <span>👤 Tên: <b id="menuPlayerName" style="color: #ffdc7a;">Minh</b></span>
+      <span>⭐ Lv: <b id="menuPlayerLv" style="color: #ffdc7a;">1</b></span>
     </div>
+    <div style="display: flex; justify-content: space-between;">
+      <span>🕒 Giờ: <b id="menuPlayerTime" style="color: #fff;">00:00</b></span>
+      <span>📅 Ngày: <b id="menuPlayerDate" style="color: #fff;">01/01/2024</b></span>
+    </div>
+    <div style="text-align: center; margin-top: 8px; border-top: 1px dashed #456078; padding-top: 8px;">
+      <span id="menuLoadSaveBtn" style="color: #ffdc7a; cursor: pointer; text-decoration: underline; font-weight: bold;">Khôi phục dữ liệu?</span>
+    </div>
+  </div>
+</div>
   </div>
 </div>
 
@@ -29,24 +44,28 @@
 <!-- ========================================== -->
 <div id="game">
   
-  <!-- THANH HEADER -->
-  <header class="hud">
-    <div class="hud-top">
-      <div class="brand">SUNRISE HOTEL</div>
-      <div class="money-box"><b id="money">500.000đ</b></div>
-      <div class="rating-box">⭐ <b id="rating">5.0</b></div>
+ <!-- THANH HEADER -->
+<header class="hud">
+  <div class="hud-top">
+    <div class="brand">SUNRISE HOTEL</div>
+    <div class="money-box"><b id="money">500.000đ</b></div>
+    <div class="rating-box">⭐ <b id="rating">5.0</b></div>
+  </div>
+  <div class="hud-bottom">
+    <div class="player-info">
+      <span id="hudName">👤 Minh</span> - <span id="hudLv">Lv.1</span>
     </div>
-    <div class="hud-bottom">
-      <div class="player-info">
-        <span id="hudName">👤 Minh</span> - <span id="hudLv">Lv.1</span>
-      </div>
-      <div class="exp-container">
-        <div class="exp-bar"><div class="exp-fill" id="expFill" style="width:0%;"></div></div>
-        <span id="hudExp">0/100</span>
-      </div>
-      <div class="version">v0.2.8</div>
+    <div class="exp-container">
+      <div class="exp-bar"><div class="exp-fill" id="expFill" style="width:0%;"></div></div>
+      <span id="hudExp">0/100</span>
     </div>
-  </header>
+    <div class="version" style="display:flex; align-items:center; gap:6px;">
+      v0.3.3
+      <!-- Nút Cài đặt thu nhỏ bằng icon bánh răng -->
+      <span id="btnSettings" style="cursor:pointer; font-size:14px; background:#1a2b3d; border:1px solid #3a5068; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">⚙️</span>
+    </div>
+  </div>
+</header>
 
   <!-- KHU VỰC SCENE (CANVAS VÀ CÁC LỚP ĐÈ LÊN) -->
   <main id="scene">
@@ -478,15 +497,96 @@
 </section>
   </main>
 
-  <!-- THANH MENU DƯỚI CÙNG (FOOTER) -->
-  <footer class="bottom">
-    <button class="nav-btn active" id="btnLobby">🚪<br>Sảnh chính</button>
-    <button class="nav-btn" id="btnElevator">🛗<br>Thang máy</button>
-    <button class="nav-btn" id="btnProfile">👤<br>Cá nhân</button>
-  </footer>
+ <!-- THANH MENU DƯỚI CÙNG (FOOTER) -->
+<footer class="bottom" style="display: flex; justify-content: space-between;">
+  <button class="nav-btn active" id="btnLobby" style="width: 23%;">🚪<br>Sảnh chính</button>
+  <button class="nav-btn" id="btnElevator" style="width: 23%;">🛗<br>Thang máy</button>
+  
+ <!-- NÚT MỞ RỘNG -->
+<button class="nav-btn" id="btnExpand" style="width: 23%; opacity: 0.6; cursor: not-allowed;">
+  <span id="btnExpandIcon">🔒</span><br><span id="btnExpandText" style="font-size: 10px;">Yêu cầu Lv.5</span>
+</button>
+  
+  <button class="nav-btn" id="btnProfile" style="width: 23%;">👤<br>Cá nhân</button>
+</footer>
   
 </div>
+<!-- BẢNG CÀI ĐẶT -->
+<section class="panel" id="settingsPanel" style="z-index: 10020;">
+  <div class="window" style="width:min(400px,100%); max-height:90dvh; display:flex; flex-direction:column; background:#e8dfce;">
+    <h2 style="color:#1e3a52; border-bottom:2px dashed #ccc; padding-bottom:10px; flex-shrink: 0; margin-top:0;">⚙️ CÀI ĐẶT HỆ THỐNG</h2>
+    
+    <div style="flex: 1; overflow-y: auto; padding-right: 5px; display:flex; flex-direction:column; gap:15px; margin-top:15px;">
+      
+      <!-- Mục Âm thanh -->
+      <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+        <h3 style="font-size:14px; margin:0 0 10px 0; color:#2c6e9e;">Âm thanh</h3>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:13px; font-weight:bold; color:#1e3a52;">Nhạc nền (BGM)</span>
+          <input type="range" id="bgmVolume" min="0" max="100" value="50" style="width:50%;">
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; font-weight:bold; color:#1e3a52;">Hiệu ứng (SFX)</span>
+          <input type="range" id="sfxVolume" min="0" max="100" value="50" style="width:50%;">
+        </div>
+      </div>
 
+      <!-- Mục Lưu trữ & Dữ liệu -->
+<div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; display:flex; flex-direction:column; gap:8px;">
+  <h3 style="font-size:14px; margin:0 0 5px 0; color:#2c6e9e;">Dữ liệu game</h3>
+  
+  <!-- Nút Sao lưu (Sinh ra mã Code) -->
+  <button class="btn-base secondary" id="saveGameBtn" style="padding:8px; font-size:13px; box-shadow:0 2px 0 #293d51;">💾 Sao lưu (Lấy mã Code)</button>
+  
+  <!-- Ô nhập mã Code và nút Khôi phục -->
+  <div style="display:flex; gap:5px; margin-top:5px;">
+    <input type="text" id="loadCodeInput" placeholder="Dán mã Code vào đây..." style="flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; font-size:12px;">
+    <button class="btn-base secondary" id="loadGameBtn" style="padding:8px; font-size:13px; box-shadow:0 2px 0 #293d51;">📂 Khôi phục</button>
+  </div>
+
+  <button class="btn-base secondary" id="restore3DaysBtn" style="padding:8px; font-size:13px; box-shadow:0 2px 0 #293d51;">⏱️ Khôi phục 3 ngày gần nhất</button>
+  <button class="btn-base" id="resetGameBtn" style="padding:8px; font-size:13px; background:#ef4444; box-shadow:0 2px 0 #991b1b; margin-top:5px;">🔄 Chơi lại từ đầu</button>
+</div>
+
+    </div>
+
+    <!-- Nút Đóng / Tiếp tục chơi -->
+    <div class="panel-actions" style="justify-content:space-between; flex-shrink:0; border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">
+      <button class="btn-base secondary" id="backToMenuBtn" style="flex:1; margin-right:5px;">Về Menu chính</button>
+      <button class="btn-base" id="closeSettingsBtn" style="flex:1;">Tiếp tục chơi</button>
+    </div>
+  </div>
+</section>
+  <!-- BẢNG THÔNG BÁO ĐẸP (Thay cho confirm/alert) -->
+<section class="panel" id="customAlertPanel" style="z-index: 99999;">
+  <div class="window" style="width:min(320px, 90%); text-align:center; background:#e8dfce; border-color:#71523d;">
+    <h2 id="alertTitle" style="color:#1e3a52; font-size:18px; margin-bottom:10px;">Thông báo</h2>
+    <p id="alertMessage" style="font-size:14px; color:#4a5d6e; margin-bottom:20px; line-height:1.5;">Nội dung thông báo...</p>
+    
+    <!-- Nút cho bảng Alert (1 nút OK) -->
+    <div id="alertBtnGroup" style="display:flex; justify-content:center;">
+      <button class="btn-base" id="alertOkBtn" style="width:100%; padding:10px;">Đồng ý</button>
+    </div>
+  </div>
+</section>
+
+<!-- BẢNG NHẬP MÃ CODE (Thay cho prompt) -->
+<section class="panel" id="customPromptPanel" style="z-index: 99999;">
+  <div class="window" style="width:min(350px, 90%); text-align:center; background:#e8dfce; border-color:#71523d;">
+    <h2 style="color:#1e3a52; font-size:18px; margin-bottom:10px;">Sao lưu dữ liệu</h2>
+    <p style="font-size:13px; color:#4a5d6e; margin-bottom:15px;">Copy đoạn mã dưới đây và cất giữ ở nơi an toàn:</p>
+    
+    <textarea id="promptInput" class="input-field" style="height:80px; font-size:11px; background:#fff; color:#1e3a52; resize:none;" readonly></textarea>
+    
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button class="btn-base secondary" id="promptCancelBtn" style="flex:1; padding:10px;">Đóng</button>
+      <button class="btn-base" id="promptOkBtn" style="flex:1; padding:10px; background:#2c6e9e; box-shadow:0 4px 0 #1a4a6e;">Copy Mã</button>
+    </div>
+  </div>
+</section>
+  
 <!-- ========================================== -->
 <!-- 3. GỌI CÁC FILE JAVASCRIPT -->
 <!-- ========================================== -->

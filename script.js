@@ -34,7 +34,25 @@ const COMMISSION_RATE = 0.4;
 let currentGuest = null; 
 let registeredGuests = []; 
 let MY_AGE = 25;
+let isGameStarted = false;
+let isGamePaused = false;
+// Hệ thống Level & EXP
+let playerLevel = 1;
+let playerExp = 0;
+let maxExp = 100; // EXP cần để lên cấp 1
 
+// Hệ thống Đánh giá
+let hotelRating = 5.0;
+// Lưu trữ 3 ngày gần nhất trong game
+let dailyBackups = [];
+let lastBackupDay = 1; 
+// Hệ thống kiên nhẫn
+let guestPatienceEndTime = 0;
+let guestMaxPatience = 90000; // 1 phút 30 giây = 90,000 ms
+
+let cleaningRoomNumber = null;
+let cleaningEndTime = 0;
+let cleaningMaxTime = 60000; // 1 phút = 60,000 ms
 // Hàm xác định danh xưng của khách dựa vào tuổi và giới tính
 function getPronoun(person) {
   const age = person.age || 20;
@@ -156,12 +174,29 @@ const createPerson = (isMale, forcedAge = null) => {
     }
   }
 
-  const displayName = guestsList.map(g => g.name).join(" & ");
+   // ... (đoạn code tạo random tên, phòng ở trên giữ nguyên) ...
 
+  const displayName = guestsList.map(g => g.name).join(" & ");
   currentGuest = { guests: guestsList, reqType: req.type, reqFloor: req.floor, rentType: 'hour', displayName: displayName };
-  draw(); 
+
+guestPatienceEndTime = Date.now() + guestMaxPatience; // Bắt đầu tính giờ kiên nhẫn 90s
+
+draw(); 
+// ...
   
-  setTimeout(() => { if (currentGuest) startConversation(); }, 500);
+    // SỬA ĐOẠN NÀY:
+  setTimeout(() => { 
+    if (currentGuest) {
+      if (currentFloor === 1) {
+        startConversation(); 
+      } else {
+        // HIỂN THỊ TOAST VÀ KHÔNG TỰ TẮT
+        toast.textContent = "Có khách đang đợi ở quầy! Vui lòng về Sảnh chính.";
+        toast.style.display = 'block';
+        clearTimeout(toastTimer); // Hủy bỏ bộ đếm thời gian tự tắt của toast
+      }
+    } 
+  }, 500);
 }
 
 function drawGuest() {
@@ -249,6 +284,47 @@ label('QR', 585, 498, 8, '#000', 'center');
     label('QUẦY LỄ TÂN', 480, 585, 18, '#e8d5b5', 'center');
     drawGuest(); 
 
+// VẼ VÒNG TRÒN KIÊN NHẪN CỦA KHÁCH Ở QUẦY
+if (currentGuest && guestPatienceEndTime > 0) {
+  const timeLeft = guestPatienceEndTime - Date.now();
+  if (timeLeft > 0) {
+ 
+    const total = guestMaxPatience;
+    const ratio = timeLeft / total;
+    
+    // Vị trí vòng tròn (ngay trên đầu người đại diện)
+    const cx = 250; // Tọa độ X (có thể chỉnh lại theo ý bạn)
+    const cy = 250; // Tọa độ Y
+    const radius = 35;
+
+    // Vẽ vòng tròn nền (màu xám)
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fill();
+
+    // Vẽ vòng tròn đếm ngược
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * ratio));
+    
+    // Đổi màu vòng tròn và icon
+    let color = '#22c55e'; // Xanh
+    let icon = '😁';
+    if (ratio <= 0.5) { color = '#f59e0b'; icon = '🙂'; } // Vàng
+    if (ratio <= 0.2) { color = '#ef4444'; icon = '😡'; } // Đỏ
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 10;
+    ctx.stroke();
+
+    // Vẽ icon mặt cười ở giữa
+    ctx.font = '45px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(icon, cx, cy);
+  }
+}
+
   } else {
     box(0, 0, 960, 600, '#94a3b8'); box(360, 0, 240, 600, '#991b1b'); box(370, 0, 220, 600, '#b91c1c'); 
     const roomW = 250; const roomH = 150; const startY = 70; const gap = 15;
@@ -259,7 +335,7 @@ label('QR', 585, 498, 8, '#000', 'center');
     else if(currentFloor === 5) currentType = "Phòng Lãng Mạn";
     else if(currentFloor === 6) currentType = "Phòng Tổng Thống";
 
-    function drawRoomTopDown(x, y, roomNumber, isLeft) {
+         function drawRoomTopDown(x, y, roomNumber, isLeft) {
       const currentRoom = roomState.find(r => r.number === roomNumber);
       let bgColor = '#f1f5f9';
       if (currentRoom.status === 'Có khách') bgColor = '#dcfce7';
@@ -341,7 +417,46 @@ label('QR', 585, 498, 8, '#000', 'center');
 
       label(roomNumber.toString(), x + 15, y + roomH - 15, 16, '#1e293b', 'left');
       label(currentType, x + roomW - 15, y + roomH - 15, 10, '#64748b', 'right');
-    }
+
+       // VẼ VÒNG TRÒN ĐẾM NGƯỢC DỌN PHÒNG (Nằm trên cùng, đè lên mọi thứ)
+  if (currentRoom.status === 'Cần dọn' && cleaningRoomNumber === roomNumber) {
+    const timeLeft = cleaningEndTime - Date.now();
+    if (timeLeft > 0) {
+      const ratio = timeLeft / cleaningMaxTime;
+      const cx = x + roomW / 2; // Tâm X của phòng
+      const cy = y + roomH / 2; // Tâm Y của phòng
+      const radius = 35;
+
+      // 1. Vẽ nền trắng
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fill();
+
+      // 2. Vẽ vòng cung đếm ngược
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * ratio));
+      
+      let color = '#22c55e';
+      if (ratio <= 0.5) color = '#f59e0b';
+      if (ratio <= 0.2) color = '#ef4444';
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+       // 3. Vẽ số giây ở giữa
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(Math.ceil(timeLeft / 1000) + 's', cx, cy);
+
+    // THÊM DÒNG NÀY ĐỂ VẼ CHỮ CẦN DỌN
+    label("CẦN DỌN", cx, cy + radius + 15, 12, '#ef4444', 'center');
+  }
+  }
+} // ĐÂY LÀ DẤU NGOẶC ĐÓNG HÀM drawRoomTopDown
 
     for(let i=0; i<3; i++){ drawRoomTopDown(360 - roomW - 30, startY + i * (roomH + gap), (currentFloor * 100) + i + 1, true); }
     for(let i=0; i<3; i++){ drawRoomTopDown(360 + 240 + 30, startY + i * (roomH + gap), (currentFloor * 100) + 4 + i, false); }
@@ -416,14 +531,49 @@ function renderRoomGrid(containerId) {
 }
 
 function handleRoomClick(roomNum) {
-  const room = roomState.find(r => r.number === roomNum); if (!room) return;
-  if (room.status === 'Cần dọn') { room.status = 'Trống'; showToast(`Đã dọn dẹp phòng ${room.number}!`); draw(); } 
-  else if (room.status === 'Có khách') { showToast(`Phòng ${room.number} đang có khách. Không thể dọn!`); } 
-  else { showToast(`Phòng ${room.number} đang trống.`); }
+  const room = roomState.find(r => r.number === roomNum); 
+  if (!room) return;
+  
+  if (room.status === 'Cần dọn') { 
+    // Nếu đang trong thời gian đếm ngược (cleaningRoomNumber trùng với phòng này)
+    if (cleaningRoomNumber === room.number) {
+      // DỌN PHÒNG NGAY LẬP TỨC
+      room.status = 'Trống';
+      cleaningRoomNumber = null;
+      cleaningEndTime = 0;
+      updateRating(0.1); // Thưởng nhẹ 0.1 sao vì đã dọn kịp
+      showToast(`Đã dọn sạch phòng ${room.number}!`);
+      draw();
+      return;
+    }
+
+    // Trường hợp phòng "Cần dọn" nhưng chưa kích hoạt đếm ngược (phòng cũ)
+    cleaningRoomNumber = room.number;
+    cleaningEndTime = Date.now() + cleaningMaxTime;
+    showToast(`Bắt đầu dọn phòng ${room.number} (60s)!`);
+    draw(); 
+  } 
+  else if (room.status === 'Có khách') { 
+    showToast(`Phòng ${room.number} đang có khách. Không thể dọn!`); 
+  } 
+  else { 
+    showToast(`Phòng ${room.number} đang trống.`); 
+  }
 }
 
 function startConversation() {
+  if (!currentGuest || guestPatienceEndTime === 0) return; // Nếu không có khách hoặc khách đã bỏ đi thì thôi
+  // ... (phần còn lại giữ nguyên)
+  // NẾU KHÔNG PHẢI Ở TẦNG 1 THÌ KHÔNG BẬT CHAT
+  if (currentFloor !== 1) {
+    document.getElementById('chatBox').style.display = 'none';
+    document.getElementById('cashDrawerBtn').style.display = 'none';
+    document.getElementById('qrBtn').style.display = 'none';
+    return; 
+  }
+
   const btn = document.getElementById('chatActionBtn');
+  // ... (phần còn lại của hàm giữ nguyên) ...
   btn.style.display = 'block'; btn.disabled = false; btn.style.opacity = '1'; btn.innerText = "Chào khách"; 
   document.getElementById('takeKey').disabled = true; document.getElementById('takeKey').style.opacity = '0.5';
   if (!currentGuest) return;
@@ -702,13 +852,21 @@ function initUI() {
   });
 
   // 3. Nút Bắt đầu
-  document.getElementById('startBtn').onclick = () => { 
-    const menu = document.getElementById('mainMenu'); 
-    if (menu) menu.remove(); 
-    resizeAll(); 
-  };
+document.getElementById('startBtn').onclick = () => { 
+  const menu = document.getElementById('mainMenu'); 
+  if (menu) menu.remove(); 
   
-  setInterval(spawnGuest, 15000); 
+  isGameStarted = true; 
+  isGamePaused = false; 
+  loadAutoSave(); 
+  updateExpandButton(); // <--- THÊM DÒNG NÀY
+  resizeAll(); 
+};
+  
+  setInterval(() => {
+  if (isGamePaused) return; // Đang tạm dừng thì không đón khách mới
+  spawnGuest();
+}, 15000); 
   setTimeout(spawnGuest, 500); 
   
   // 4. Nút trong hội thoại
@@ -819,6 +977,7 @@ document.getElementById('payBillBtn').onclick = () => {
     document.getElementById('qrBtn').style.display = 'block'; 
     showToast("Hãy chạm vào mã QR trên quầy để khách quét!");
   };
+  
 };
 
 
@@ -1077,43 +1236,77 @@ document.getElementById('takeKey').onclick = () => {
   draw(); 
  showToast(`Đã nhận phòng ${room.number} thành công!`);
 // Tự động ẩn khung hội thoại sau 1 giây
-setTimeout(() => {
-  document.getElementById('chatBox').style.display = 'none';
-}, 1000);
+// Tắt hội thoại ngay lập tức
+document.getElementById('chatBox').style.display = 'none';
 };
 
-  // 15. Thanh Điều Hướng Dưới Cùng
-  navBtns.forEach(btn => {
-    btn.onclick = () => {
-      navBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active');
-      if (btn.id === 'btnLobby') { currentFloor = 1; draw(); }
-      else if (btn.id === 'btnElevator') { 
-        document.querySelectorAll('.elev-btn[data-floor]').forEach(eb => {
-          const tag = eb.querySelector('.current-tag');
-          if(tag) tag.style.display = (parseInt(eb.dataset.floor) === currentFloor) ? 'inline-block' : 'none';
-        });
-        document.getElementById('elevatorPanel').classList.add('show'); 
+ // 15. Thanh Điều Hướng Dưới Cùng
+navBtns.forEach(btn => {
+  btn.onclick = () => {
+    // Nếu bấm vào nút Mở rộng
+    if (btn.id === 'btnExpand') {
+      if (playerLevel < 5) {
+        showToast("Tính năng này sẽ mở khóa ở Cấp độ 5!");
+      } else {
+        showToast("Chức năng đang được phát triển!");
+        // Sau này bạn có thể mở bảng Mở rộng ở đây
       }
-      else if (btn.id === 'btnProfile') { 
-        document.getElementById('computerPanel').classList.remove('show');
-        document.getElementById('keyPanel').classList.remove('show');
-        document.getElementById('billPanel').classList.remove('show');
-        document.getElementById('elevatorPanel').classList.remove('show');
-        document.getElementById('profilePanel').classList.add('show'); 
-      }
-    };
-  });
+      return; // Dừng lại, không chạy các lệnh đổi màu nút bên dưới
+    }
 
-  // 16. Thang Máy
-  document.getElementById('closeElevator').onclick = () => document.getElementById('elevatorPanel').classList.remove('show');
-  document.querySelectorAll('.elev-btn[data-floor]').forEach(btn => {
-    btn.onclick = () => {
-      currentFloor = parseInt(btn.dataset.floor);
+    navBtns.forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active');
+    
+   if (btn.id === 'btnLobby') { 
+  currentFloor = 1; 
+  draw(); 
+  
+  // TẮT TOAST KHI VỀ SẢNH CHÍNH
+  toast.style.display = 'none'; 
+  clearTimeout(toastTimer);
+
+  if (currentGuest) {
+    startConversation();
+  }
+   }
+    else if (btn.id === 'btnElevator') { 
+      document.querySelectorAll('.elev-btn[data-floor]').forEach(eb => {
+        const tag = eb.querySelector('.current-tag');
+        if(tag) tag.style.display = (parseInt(eb.dataset.floor) === currentFloor) ? 'inline-block' : 'none';
+      });
+      document.getElementById('elevatorPanel').classList.add('show'); 
+    }
+    else if (btn.id === 'btnProfile') { 
+      document.getElementById('computerPanel').classList.remove('show');
+      document.getElementById('keyPanel').classList.remove('show');
+      document.getElementById('billPanel').classList.remove('show');
       document.getElementById('elevatorPanel').classList.remove('show');
-      if (currentFloor === 1) { navBtns.forEach(b => b.classList.remove('active')); document.getElementById('btnLobby').classList.add('active'); }
-      draw(); 
-    };
-  });
+      document.getElementById('profilePanel').classList.add('show'); 
+    }
+  };
+});
+
+ // 16. Thang Máy
+document.getElementById('closeElevator').onclick = () => document.getElementById('elevatorPanel').classList.remove('show');
+document.querySelectorAll('.elev-btn[data-floor]').forEach(btn => {
+  btn.onclick = () => {
+    currentFloor = parseInt(btn.dataset.floor);
+    document.getElementById('elevatorPanel').classList.remove('show');
+    if (currentFloor === 1) { 
+      navBtns.forEach(b => b.classList.remove('active')); 
+      document.getElementById('btnLobby').classList.add('active'); 
+      
+      // TẮT TOAST KHI THANG MÁY VỀ TẦNG 1
+      toast.style.display = 'none';
+      clearTimeout(toastTimer);
+
+      if (currentGuest) {
+        startConversation();
+      }
+    }
+    draw(); 
+  };
+});
 
   // 17. Cá Nhân
   document.getElementById('closeProfile').onclick = () => document.getElementById('profilePanel').classList.remove('show');
@@ -1157,7 +1350,18 @@ function updateClockUI() {
   document.getElementById('gameDate').innerText = `${d}/${mo}/${y}`;
 }
 
-setInterval(() => { gameTime.setMinutes(gameTime.getMinutes() + 5); updateClockUI(); }, 1000);
+setInterval(() => { 
+  // Chỉ chạy khi đã bấm Bắt đầu và không mở bảng Cài đặt
+  if (!isGameStarted || isGamePaused) return; 
+
+  gameTime.setMinutes(gameTime.getMinutes() + 5); 
+  updateClockUI(); 
+  
+  if (gameTime.getDate() !== lastBackupDay) {
+    lastBackupDay = gameTime.getDate();
+    createDailyBackup();
+  }
+}, 1000);
 
 function renderCalendar() {
   const grid = document.getElementById('calendarGrid');
@@ -1201,9 +1405,16 @@ function finishPayment() {
   
   // Cộng tiền vào ví
   hotelMoney += hotelKeep; 
-  playerMoney += commission;
-  totalRevenue += finalPrice; 
-  updateMoneyUI();
+playerMoney += commission;
+totalRevenue += finalPrice; 
+occupiedRooms++;
+updateMoneyUI();
+
+// CỘNG EXP: Cứ 10.000đ doanh thu = 1 EXP (Bạn có thể sửa số 10000)
+const expEarned = Math.floor(finalPrice / 10000); 
+addExp(expEarned); 
+// Hồi phục đánh giá nhẹ mỗi khi đón khách thành công (tăng 0.1 sao)
+updateRating(0.1);
   
   // Ghi vào Sao kê
   const list = document.getElementById('receipt-list');
@@ -1229,12 +1440,23 @@ function finishPayment() {
 }
 
 setInterval(() => {
+  if (isGamePaused) return; // Đang tạm dừng thì ngừng đếm ngược
+  
   let needsRedraw = false;
   const now = Date.now();
+  // ... (phần còn lại giữ nguyên) ...
   roomState.forEach(room => {
     if (room.status === 'Có khách' && room.checkOutTime > 0 && now >= room.checkOutTime) {
-      room.status = 'Cần dọn'; room.checkOutTime = 0; occupiedRooms--;
-      updateMoneyUI(); 
+  room.status = 'Cần dọn'; 
+  room.checkOutTime = 0; 
+  occupiedRooms--;
+  
+  // THÊM 2 DÒNG NÀY ĐỂ TỰ ĐỘNG ĐẾM NGƯỢC KHI KHÁCH ĐI
+  cleaningRoomNumber = room.number;
+  cleaningEndTime = Date.now() + cleaningMaxTime;
+
+  updateMoneyUI(); 
+  // ... (code cũ giữ nguyên) ...
       
       const checkOutDiv = document.getElementById('diaryCheckOut');
       if (checkOutDiv.innerHTML.includes('Chưa có dữ liệu')) checkOutDiv.innerHTML = '';
@@ -1247,10 +1469,527 @@ setInterval(() => {
       needsRedraw = true; 
     }
   });
-  if (needsRedraw && currentFloor !== 1) { draw(); }
+  
+  if (currentFloor === 1 && currentGuest && guestPatienceEndTime > 0) {
+    needsRedraw = true; 
+  }
+
+  if (needsRedraw) { draw(); }
 }, 1000);
 
+// Hàm cộng EXP và xử lý lên cấp
+function addExp(amount) {
+  playerExp += amount;
+  
+  while (playerExp >= maxExp) {
+    playerExp -= maxExp;
+    playerLevel++;
+    maxExp = Math.floor(maxExp * 1.5); 
+    
+    setTimeout(() => {
+      showToast(`🎉 CHÚC MỪNG! Bạn đã đạt Level ${playerLevel}!`);
+    }, 500);
+  }
+  
+  document.getElementById('hudLv').innerText = `Lv.${playerLevel}`;
+  document.getElementById('hudExp').innerText = `${playerExp}/${maxExp}`;
+  document.getElementById('expFill').style.width = `${(playerExp / maxExp) * 100}%`;
+  
+  // THÊM DÒNG NÀY ĐỂ TỰ ĐỘNG CẬP NHẬT NÚT MỞ RỘNG
+  updateExpandButton();
+}
+
+// Hàm cập nhật điểm đánh giá (Rating)
+function updateRating(amount) {
+  hotelRating += amount;
+  if (hotelRating > 5.0) hotelRating = 5.0;
+  if (hotelRating < 1.0) hotelRating = 1.0; // Thấp nhất là 1 sao
+  
+  document.getElementById('rating').innerText = hotelRating.toFixed(1);
+}
+// Vòng lặp kiểm tra thời gian liên tục (chạy mỗi 1 giây)
+setInterval(() => {
+  // 1. Kiểm tra kiên nhẫn của khách ở quầy
+  if (currentGuest && guestPatienceEndTime > 0 && Date.now() >= guestPatienceEndTime) {
+    // Hết kiên nhẫn
+    showToast("Khách đã mất kiên nhẫn và bỏ đi! (-1 Sao)");
+    updateRating(-1.0);
+    
+    currentGuest = null;
+    guestPatienceEndTime = 0;
+    document.getElementById('chatBox').style.display = 'none';
+    document.getElementById('cashDrawerBtn').style.display = 'none';
+    document.getElementById('qrBtn').style.display = 'none';
+    draw();
+  }
+
+ // KIỂM TRA HẾT THỜI GIAN DỌN PHÒNG
+if (cleaningRoomNumber !== null && now >= cleaningEndTime) {
+  const roomToClean = roomState.find(r => r.number === cleaningRoomNumber);
+  if (roomToClean) {
+    roomToClean.status = 'Trống'; // Tự động dọn
+  }
+  updateRating(-0.2); // Trừ 0.2 sao vì dọn trễ
+  showToast(`Hết thời gian! Phòng ${cleaningRoomNumber} đã được tự động dọn. (-0.2 Sao)`);
+  
+  cleaningRoomNumber = null;
+  cleaningEndTime = 0;
+  needsRedraw = true; // Để vẽ lại màn hình
+}
+}, 1000); // Cứ mỗi 1 giây kiểm tra một lần
+// ==========================================
+// HỆ THỐNG CÀI ĐẶT & ÂM THANH
+// ==========================================
+// Tạo đối tượng âm thanh (Bạn cần có file nhạc thật trong thư mục dự án để phát)
+const bgmAudio = new Audio('art/bgm.mp3'); // Thay bằng tên file nhạc nền của bạn
+bgmAudio.loop = true;
+let isBGMPlaying = false;
+
+// Nút Mở Cài đặt
+let pauseStartTime = 0;
+
+document.getElementById('btnSettings').onclick = () => {
+  isGamePaused = true; 
+  pauseStartTime = Date.now(); // Ghi nhớ lúc bắt đầu tạm dừng
+  document.getElementById('settingsPanel').classList.add('show');
+};
+
+document.getElementById('closeSettingsBtn').onclick = () => {
+  isGamePaused = false; 
+  document.getElementById('settingsPanel').classList.remove('show');
+  
+  // Cộng bù thời gian cho khách đang đợi
+  const pausedDuration = Date.now() - pauseStartTime;
+  if (guestPatienceEndTime > 0) {
+    guestPatienceEndTime += pausedDuration;
+  }
+  
+  // Cộng bù thời gian cho các phòng đang có khách
+  roomState.forEach(room => {
+    if (room.status === 'Có khách' && room.checkOutTime > 0) {
+      room.checkOutTime += pausedDuration;
+    }
+  });
+
+  // Cộng bù thời gian dọn phòng
+  if (cleaningRoomNumber !== null) {
+    cleaningEndTime += pausedDuration;
+  }
+};
+
+// Nút Về Menu Chính (Tự động lưu và thoát)
+document.getElementById('backToMenuBtn').onclick = () => {
+  autoSaveGame(); // Lưu game
+  isGamePaused = true; // Dừng mọi hoạt động (đồng hồ, khách, v.v...)
+  location.reload(); // Tải lại trang
+};
+
+// Tùy chỉnh âm lượng
+document.getElementById('bgmVolume').oninput = (e) => {
+  const vol = e.target.value / 100;
+  bgmAudio.volume = vol;
+  
+  // Nếu kéo âm lượng > 0 và nhạc chưa phát thì tự động phát
+  if (vol > 0 && !isBGMPlaying) {
+    bgmAudio.play().catch(err => console.log("Trình duyệt chặn tự động phát nhạc:", err));
+    isBGMPlaying = true;
+  }
+};
+
+document.getElementById('sfxVolume').oninput = (e) => {
+  // Code xử lý âm thanh SFX (nếu bạn có sử dụng)
+  // console.log("SFX Volume: " + e.target.value);
+};
+
+// --- HỆ THỐNG LƯU / TẢI BẰNG MÃ CODE ---
+
+// Hàm tạo đối tượng chứa toàn bộ dữ liệu game
+function getGameData() {
+  return {
+    hotelMoney: hotelMoney,
+    playerMoney: playerMoney,
+    totalRevenue: totalRevenue,
+    playerLevel: playerLevel,
+    playerExp: playerExp,
+    maxExp: maxExp,
+    hotelRating: hotelRating,
+    roomState: roomState
+  };
+}
+
+// 1. Nút Sao Lưu (Tạo mã Code)
+document.getElementById('saveGameBtn').onclick = () => {
+  const data = getGameData();
+  const jsonString = JSON.stringify(data);
+  const saveCode = btoa(unescape(encodeURIComponent(jsonString))); 
+  
+  showCustomPrompt("Sao lưu thành công", "Hãy copy đoạn mã dưới đây và cất giữ ở nơi an toàn:", saveCode);
+};
+
+// 2. Nút Khôi Phục (Từ mã Code)
+document.getElementById('loadGameBtn').onclick = () => {
+  const inputCode = document.getElementById('loadCodeInput').value.trim();
+  
+  if (!inputCode) {
+    showToast("Vui lòng dán mã Code vào ô trống!");
+    return;
+  }
+
+  try {
+    // Giải mã Base64 thành chuỗi JSON
+    const jsonString = decodeURIComponent(escape(atob(inputCode)));
+    const data = JSON.parse(jsonString);
+
+    // Kiểm tra xem dữ liệu có hợp lệ không
+    if (data.hotelMoney === undefined || !data.roomState) {
+      throw new Error("Mã Code không hợp lệ!");
+    }
+
+    // Khôi phục biến
+    hotelMoney = data.hotelMoney;
+    playerMoney = data.playerMoney;
+    totalRevenue = data.totalRevenue;
+    playerLevel = data.playerLevel;
+    playerExp = data.playerExp;
+    maxExp = data.maxExp;
+    hotelRating = data.hotelRating;
+    
+    // Khôi phục mảng phòng
+    data.roomState.forEach((savedRoom, idx) => {
+      roomState[idx] = savedRoom;
+    });
+
+    // Cập nhật giao diện
+    updateMoneyUI();
+    document.getElementById('hudLv').innerText = `Lv.${playerLevel}`;
+    document.getElementById('hudExp').innerText = `${playerExp}/${maxExp}`;
+    document.getElementById('expFill').style.width = `${(playerExp / maxExp) * 100}%`;
+    document.getElementById('rating').innerText = hotelRating.toFixed(1);
+    
+    draw();
+    document.getElementById('settingsPanel').classList.remove('show');
+    showToast("Khôi phục dữ liệu thành công!");
+setTimeout(() => {
+      location.reload();
+    }, 1000);
+  } catch (error) {
+    showToast("Lỗi: Mã Code không hợp lệ hoặc đã bị hỏng!");
+    console.error(error);
+  }
+};
+
+document.getElementById('restore3DaysBtn').onclick = () => {
+  if (dailyBackups.length === 0) {
+    showCustomAlert("Chưa có bản sao lưu ngày nào!");
+    return;
+  }
+  
+  // Lấy bản lưu gần nhất (cuối mảng)
+  const latestBackup = dailyBackups[dailyBackups.length - 1];
+  
+  showCustomAlert(`Bạn có muốn khôi phục dữ liệu của ngày ${latestBackup.date} không?`, true, () => {
+    const data = latestBackup.data;
+    
+    hotelMoney = data.hotelMoney;
+    playerMoney = data.playerMoney;
+    totalRevenue = data.totalRevenue;
+    playerLevel = data.playerLevel;
+    playerExp = data.playerExp;
+    maxExp = data.maxExp;
+    hotelRating = data.hotelRating;
+    roomState = data.roomState;
+    
+    updateMoneyUI();
+    document.getElementById('hudLv').innerText = `Lv.${playerLevel}`;
+    document.getElementById('hudExp').innerText = `${playerExp}/${maxExp}`;
+    document.getElementById('expFill').style.width = `${(playerExp / maxExp) * 100}%`;
+    document.getElementById('rating').innerText = hotelRating.toFixed(1);
+    
+    draw();
+    document.getElementById('settingsPanel').classList.remove('show');
+    showToast(`Đã khôi phục dữ liệu ngày ${latestBackup.date}!`);
+  });
+};
+// Nút Chơi lại từ đầu
+document.getElementById('resetGameBtn').onclick = () => {
+  showCustomAlert("CẢNH BÁO: Toàn bộ dữ liệu (Tiền, Cấp độ, Đánh giá) sẽ bị xóa sạch. Bạn có chắc không?", true, () => {
+    
+    // 1. Dừng mọi hoạt động tự động lưu
+    isGameStarted = false; 
+    isGamePaused = true;
+
+    // 2. Xóa toàn bộ dữ liệu trong bộ nhớ trình duyệt
+    localStorage.removeItem('sunriseHotel_AutoSave'); // Xóa file lưu tự động
+    localStorage.removeItem('sunriseHotel_SaveData'); // Xóa file lưu thủ công (nếu có)
+    localStorage.removeItem('sunriseHotel_DailyBackups'); // Xóa file lưu 3 ngày
+    
+    // 3. Xóa các biến trong bộ nhớ tạm để chắc chắn
+    dailyBackups = [];
+    
+    // 4. Tải lại trang
+    location.reload();
+  });
+};
+
+// Bật nhạc nền (nếu có file)
+window.addEventListener('DOMContentLoaded', () => {
+  bgmAudio.volume = 0.5; // Mặc định 50%
+  // Trình duyệt yêu cầu người dùng phải tương tác mới cho phát nhạc
+  document.body.addEventListener('click', () => {
+    if (bgmAudio.volume > 0 && !isBGMPlaying) {
+      bgmAudio.play().catch(()=>{});
+      isBGMPlaying = true;
+    }
+  }, { once: true }); // Chỉ chạy 1 lần
+});
+// Hàm tự động sao lưu khi sang ngày mới
+function createDailyBackup() {
+  const backupData = {
+    date: `${gameTime.getDate()}/${gameTime.getMonth() + 1}/${gameTime.getFullYear()}`,
+    data: {
+      hotelMoney: hotelMoney,
+      playerMoney: playerMoney,
+      totalRevenue: totalRevenue,
+      playerLevel: playerLevel,
+      playerExp: playerExp,
+      maxExp: maxExp,
+      hotelRating: hotelRating,
+      roomState: JSON.parse(JSON.stringify(roomState)) // Copy sâu mảng phòng
+    }
+  };
+
+  dailyBackups.push(backupData);
+
+  // Nếu có nhiều hơn 3 bản, xóa bản cũ nhất (ở đầu mảng)
+  if (dailyBackups.length > 3) {
+    dailyBackups.shift();
+  }
+  
+  // Lưu vào bộ nhớ trình duyệt để không mất khi F5
+  localStorage.setItem('sunriseHotel_DailyBackups', JSON.stringify(dailyBackups));
+}
+
+// Tải lại các bản sao lưu đã lưu trước đó (nếu có)
+const savedBackups = localStorage.getItem('sunriseHotel_DailyBackups');
+if (savedBackups) {
+  dailyBackups = JSON.parse(savedBackups);
+}
+// ==========================================
+// HỆ THỐNG THÔNG BÁO TÙY CHỈNH (CUSTOM UI)
+// ==========================================
+
+function showCustomAlert(message, isConfirm = false, onConfirm = null) {
+  document.getElementById('alertTitle').innerText = isConfirm ? "Xác nhận" : "Thông báo";
+  document.getElementById('alertMessage').innerHTML = message;
+  
+  const btnGroup = document.getElementById('alertBtnGroup');
+  
+  if (isConfirm) {
+    // Nếu là bảng xác nhận (có 2 nút Hủy / Đồng ý)
+    btnGroup.innerHTML = `
+      <button class="btn-base secondary" id="alertCancelBtn" style="flex:1; margin-right:5px; padding:10px;">Hủy</button>
+      <button class="btn-base" id="alertConfirmBtn" style="flex:1; padding:10px; background:#ef4444; box-shadow:0 4px 0 #991b1b;">Đồng ý</button>
+    `;
+    document.getElementById('alertCancelBtn').onclick = () => {
+      document.getElementById('customAlertPanel').classList.remove('show');
+    };
+    document.getElementById('alertConfirmBtn').onclick = () => {
+      document.getElementById('customAlertPanel').classList.remove('show');
+      if (onConfirm) onConfirm();
+    };
+  } else {
+    // Nếu chỉ là thông báo (1 nút OK)
+    btnGroup.innerHTML = `<button class="btn-base" id="alertOkBtn" style="width:100%; padding:10px;">Đóng</button>`;
+    document.getElementById('alertOkBtn').onclick = () => {
+      document.getElementById('customAlertPanel').classList.remove('show');
+    };
+  }
+  
+  document.getElementById('customAlertPanel').classList.add('show');
+}
+
+function showCustomPrompt(title, message, defaultValue, onConfirm) {
+  document.getElementById('promptInput').value = defaultValue;
+  document.querySelector('#customPromptPanel h2').innerText = title;
+  document.querySelector('#customPromptPanel p').innerText = message;
+  
+  document.getElementById('customPromptPanel').classList.add('show');
+  
+  // Nút Copy Mã
+  document.getElementById('promptOkBtn').onclick = () => {
+    document.getElementById('promptInput').select();
+    document.execCommand('copy'); // Tự động copy vào bộ nhớ tạm
+    showToast("Đã copy mã Code vào bộ nhớ tạm!");
+    document.getElementById('customPromptPanel').classList.remove('show');
+    if (onConfirm) onConfirm();
+  };
+  
+  // Nút Đóng
+  document.getElementById('promptCancelBtn').onclick = () => {
+    document.getElementById('customPromptPanel').classList.remove('show');
+  };
+}
+  // Hàm tự động lưu vào máy
+function autoSaveGame() {
+  if (!isGameStarted) return; 
+
+  try {
+    const data = {
+      hotelMoney: hotelMoney,
+      playerMoney: playerMoney,
+      totalRevenue: totalRevenue,
+      playerLevel: playerLevel,
+      playerExp: playerExp,
+      maxExp: maxExp,
+      hotelRating: hotelRating,
+      roomState: roomState,
+      gameTime: gameTime.getTime() // LƯU THỜI GIAN GAME (dạng số mili-giây)
+    };
+    localStorage.setItem('sunriseHotel_AutoSave', JSON.stringify(data));
+  } catch (e) {
+    console.log("Lỗi khi lưu Auto-Save:", e);
+  }
+}
+
+// Hàm tự động tải lại khi mở game
+function loadAutoSave() {
+  const autoSaved = localStorage.getItem('sunriseHotel_AutoSave');
+  if (!autoSaved) return; 
+
+  try {
+    const data = JSON.parse(autoSaved);
+    
+    if (data.hotelMoney !== undefined) hotelMoney = data.hotelMoney;
+    if (data.playerMoney !== undefined) playerMoney = data.playerMoney;
+    if (data.totalRevenue !== undefined) totalRevenue = data.totalRevenue;
+    if (data.playerLevel !== undefined) playerLevel = data.playerLevel;
+    if (data.playerExp !== undefined) playerExp = data.playerExp;
+    if (data.maxExp !== undefined) maxExp = data.maxExp;
+    if (data.hotelRating !== undefined) hotelRating = data.hotelRating;
+    
+    // KHÔI PHỤC THỜI GIAN GAME
+    if (data.gameTime !== undefined) {
+      gameTime = new Date(data.gameTime); // Chuyển từ số về đối tượng Date
+    }
+
+    if (data.roomState && data.roomState.length > 0) {
+      data.roomState.forEach((savedRoom, idx) => {
+        if (roomState[idx]) {
+          roomState[idx] = savedRoom;
+        }
+      });
+    }
+    
+    updateMoneyUI();
+    document.getElementById('hudLv').innerText = `Lv.${playerLevel}`;
+    document.getElementById('hudExp').innerText = `${playerExp}/${maxExp}`;
+    document.getElementById('expFill').style.width = `${(playerExp / maxExp) * 100}%`;
+    document.getElementById('rating').innerText = hotelRating.toFixed(1);
+    
+    updateClockUI(); // Cập nhật lại đồng hồ hiển thị đúng giờ vừa load
+    draw();
+    
+    showToast("Đã tải lại tiến trình đang chơi!");
+  } catch (e) {
+    console.log("Lỗi khi khôi phục Auto-Save:", e);
+  }
+}
+// ==========================================
+// HIỂN THỊ THÔNG TIN Ở MENU CHÍNH
+// ==========================================
+// Hàm này sẽ chạy khi ở Menu chính để lấy dữ liệu Auto-Save hiển thị ra
+// Hàm này sẽ chạy khi ở Menu chính để lấy dữ liệu Auto-Save hiển thị ra
+function updateMenuInfo() {
+  const autoSaved = localStorage.getItem('sunriseHotel_AutoSave');
+  
+  if (autoSaved) {
+    try {
+      const data = JSON.parse(autoSaved);
+      
+      // Hiển thị Tên và Level
+      document.getElementById('menuPlayerName').innerText = "Minh"; // Tên mặc định
+      document.getElementById('menuPlayerLv').innerText = data.playerLevel || 1;
+      
+      // Hiển thị Giờ và Ngày
+      if (data.gameTime !== undefined) {
+        const d = new Date(data.gameTime); // Lấy thời gian từ file lưu
+        document.getElementById('menuPlayerTime').innerText = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        document.getElementById('menuPlayerDate').innerText = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+      } else {
+        // Nếu file lưu cũ chưa có thời gian, hiển thị mặc định
+        document.getElementById('menuPlayerTime').innerText = "00:00";
+        document.getElementById('menuPlayerDate').innerText = "01/01/2024";
+      }
+      
+    } catch (e) {
+      console.log("Lỗi đọc file save ở Menu:", e);
+    }
+  } else {
+    // Nếu chưa từng chơi, hiển thị thông số mặc định
+    document.getElementById('menuPlayerLv').innerText = "1";
+    document.getElementById('menuPlayerTime').innerText = "00:00";
+    document.getElementById('menuPlayerDate').innerText = "01/01/2024";
+  }
+}
+
+// Gọi hàm này ngay khi web tải xong (lúc đang ở Menu chính)
+updateMenuInfo();
+
+// Xử lý sự kiện bấm vào nút "Khôi phục dữ liệu?"
+document.getElementById('menuLoadSaveBtn').onclick = () => {
+  // Mở bảng Cài đặt
+  document.getElementById('settingsPanel').classList.add('show');
+  
+  // (Tuỳ chọn) Cuộn xuống phần dữ liệu game
+  const dataSection = document.getElementById('settingsPanel').querySelector('.window');
+  if (dataSection) {
+    dataSection.scrollTop = dataSection.scrollHeight;
+  }
+};
+// ==========================================
+// KIỂM TRA LEVEL ĐỂ MỞ KHÓA NÚT
+// ==========================================
+function updateExpandButton() {
+  const btn = document.getElementById('btnExpand');
+  const icon = document.getElementById('btnExpandIcon');
+  const text = document.getElementById('btnExpandText');
+
+  if (!btn || !icon || !text) return; // Tránh lỗi nếu không tìm thấy nút
+
+  if (playerLevel >= 5) {
+    // Đã đủ Lv.5 -> Mở khóa
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    icon.innerText = '🏢'; // Đổi icon (bạn có thể đổi thành icon khác tùy thích)
+    text.innerText = 'Mở rộng';
+    text.style.fontSize = '13px'; // Chữ to lại cho bằng các nút khác
+    text.style.fontWeight = 'bold';
+  } else {
+    // Chưa đủ Lv.5 -> Khóa
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'not-allowed';
+    icon.innerText = '🔒';
+    text.innerText = 'Yêu cầu Lv.5';
+    text.style.fontSize = '10px';
+    text.style.fontWeight = 'normal';
+  }
+}
+  
+  
+  // Tự động lưu mỗi 10 giây
+setInterval(autoSaveGame, 10000);
+
+// Lưu ngay khi tắt trang
+window.addEventListener('beforeunload', () => {
+  autoSaveGame();
+});
 updateClockUI();
-window.addEventListener('DOMContentLoaded', () => { initUI(); resizeAll(); });
+window.addEventListener('DOMContentLoaded', () => { 
+  isGamePaused = false; 
+  isGameStarted = false; 
+  initUI(); 
+  updateMenuInfo(); // <--- GỌI HÀM HIỂN THỊ THÔNG TIN MENU Ở ĐÂY
+  resizeAll(); 
+});
 window.addEventListener('resize', resizeAll);
 window.addEventListener('orientationchange', () => setTimeout(resizeAll, 200));

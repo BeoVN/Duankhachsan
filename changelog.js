@@ -18,7 +18,22 @@ function showChangelog() {
       <!-- PHIÊN BẢN MỚI NHẤT -->
 
 <details open>
-  <summary>Phiên bản 0.2.8 (Mới nhất)</summary>
+  <summary>Phiên bản 0.3.3 (Mới nhất)</summary>
+  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 23:00 - 08/11/2026</div>
+  <ul>
+    <li><b>Tất cả được tóm tắt bởi A.I</b></li>
+    <li>✅ <b>Hệ thống Cài đặt & Âm thanh:</b> Thêm nút Cài đặt (⚙️). Cho phép tùy chỉnh âm lượng Nhạc nền (BGM) và Hiệu ứng (SFX). Tự động tạm dừng toàn bộ game (đồng hồ, khách, đếm ngược) khi mở Cài đặt.</li>
+    <li>✅ <b>Hệ thống Level & Đánh giá:</b> Thêm thanh kinh nghiệm (EXP) và cấp độ (Level). Tích lũy EXP khi đón khách để thăng cấp. Khách bỏ đi hoặc dọn phòng trễ sẽ bị trừ điểm đánh giá (Rating).</li>
+    <li>✅ <b>Hệ thống Kiên nhẫn:</b> Khách ở quầy có vòng tròn đếm ngược 90s (Mặt cười 😁 -> 🙂 -> 😡). Hết giờ khách bỏ đi và trừ 1 sao.</li>
+    <li>✅ <b>Dọn phòng khẩn cấp:</b> Phòng khách trả sẽ có vòng tròn đếm ngược 60s. Chạm vào để dọn ngay (được +0.1 sao). Nếu để hết 60s, phòng tự động dọn nhưng bị trừ 0.2 sao.</li>
+    <li>✅ <b>Lưu & Khôi phục nâng cao:</b> Tự động lưu (Auto-save) sau mỗi 10 giây và khi tắt tab. Hệ thống Sao lưu/Khôi phục bằng Mã Code (Base64) cho phép chuyển dữ liệu sang máy khác. Hỗ trợ khôi phục 3 ngày gần nhất trong game.</li>
+    <li>✅ <b>Menu chính nâng cấp:</b> Hiển thị thông tin người chơi (Tên, Lv, Giờ, Ngày) ngay tại Menu. Thêm nút "Khôi phục dữ liệu" nhanh.</li>
+    <li>✅ <b>Nút Mở rộng:</b> Thêm nút chức năng mới ở thanh điều hướng, tự động khóa (Yêu cầu Lv.5) và mở khóa khi đạt đủ cấp độ.</li>
+    <li>✅ <b>Tối ưu hóa:</b> Sửa lỗi hiển thị thời gian, đồng bộ giờ game vào Sao kê, tự động tải lại trang khi khôi phục dữ liệu, và thay thế các hộp thoại mặc định bằng giao diện thông báo đẹp mắt.</li>
+  </ul>
+</details>
+<details open>
+  <summary>Phiên bản 0.2.8</summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 01:30 - 08/11/2026</div>
   <ul>
     <li><b>Tất cả được tóm tắt bởi A.I</b></li>
