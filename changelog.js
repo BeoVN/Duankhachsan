@@ -18,7 +18,21 @@ function showChangelog() {
       <!-- PHIÊN BẢN MỚI NHẤT -->
 
 <details open>
-  <summary>Phiên bản 0.3.3 (Mới nhất)</summary>
+  <summary>Phiên bản 0.3.6 (Mới nhất)</summary>
+  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 00:00 - 12/11/2026</div>
+  <ul>
+    <li><b>Tất cả được tóm tắt bởi A.I</b></li>
+    <li>✅ <b>Hệ thống Mở rộng Quy mô:</b> Thêm bảng Mở rộng (Yêu cầu Lv.5). Bao gồm 2 tab: Bên trong (Thông tin khách sạn, Thông tin nhân viên, Mua lại khách sạn) và Bên ngoài (Đang cập nhật). Tự động tạm dừng game khi mở bảng.</li>
+    <li>✅ <b>Thông tin Khách sạn:</b> Xem chi tiết Tên, Địa chỉ, Số phòng, Đánh giá, Lưu lượng khách (24h), Bảng giá chi tiết 5 loại phòng và Ưu đãi đoàn đông. Tab Quản lý bị khóa cho đến khi mua lại khách sạn.</li>
+    <li>✅ <b>Thông tin Nhân viên:</b> Danh sách 7 chức vụ (Lễ tân, Bảo vệ, Vệ sinh, Dọn phòng, Dẫn khách, Quản lý, Chủ khách sạn). Hiển thị Tên, Tuổi, Số lượng và Trạng thái (🟢 Đang làm việc / 🔴 Đang nghỉ).</li>
+    <li>✅ <b>Mua lại Khách sạn:</b> Tính năng mua lại Sunrise Hotel với giá 1 tỷ 300 triệu. Mở khóa toàn bộ tính năng Quản lý và thay đổi giao diện nút Mua thành "Bạn đã sở hữu khách sạn" màu vàng hoàng gia.</li>
+    <li>✅ <b>Hoạt ảnh Nhân viên:</b> Nhân viên Bảo vệ đứng ở Tầng hầm. Nhân viên Vệ sinh đi lại dọc hành lang. Nhân viên Dọn phòng tự động đi từ thang máy đến phòng cần dọn (chờ 3s, dọn 10s).</li>
+    <li>✅ <b>Dẫn khách lên phòng:</b> Khách sau khi nhận phòng sẽ được nhân viên dẫn khách đưa lên đúng tầng. Khách đi nối đuôi phía sau nhân viên theo đội hình (1, 2, 3, 4 người), di chuyển mượt mà từ thang máy đến cửa phòng.</li>
+    <li>✅ <b>Tối ưu hóa:</b> Sửa lỗi tạm dừng game bị bù thời gian sai, lỗi thời gian nhảy vọt khi mở bảng Mở rộng. Thanh thời gian trong phòng giữ nguyên vị trí khi tạm dừng. Tăng tốc độ xử lý và cập nhật Toast thông báo.</li>
+  </ul>
+</details>
+<details open>
+  <summary>Phiên bản 0.3.3 </summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 23:00 - 08/11/2026</div>
   <ul>
     <li><b>Tất cả được tóm tắt bởi A.I</b></li>
