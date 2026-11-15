@@ -2,7 +2,6 @@
 // FILE XỬ LÝ HÌNH ẢNH VÀ HOẠT ẢNH NHÂN VIÊN
 // ==========================================
 
-// 1. Khai báo hình ảnh
 const staffImages = {
   baoVe_Nam: new Image(), 
   danKhach_Nam: new Image(), 
@@ -13,7 +12,6 @@ const staffImages = {
   veSinh_Nu: new Image()
 };
 
-// Đường dẫn ảnh (Vì thư mục staff nằm ngang hàng với file html)
 staffImages.baoVe_Nam.src = 'staff/namnvbaove.png';
 staffImages.danKhach_Nam.src = 'staff/namnvdankhach.png';
 staffImages.danKhach_Nu.src = 'staff/nunvdankhach.png';
@@ -22,239 +20,346 @@ staffImages.donPhong_Nu.src = 'staff/nunvdonphong.png';
 staffImages.veSinh_Nam.src = 'staff/namnvvesinh.png';
 staffImages.veSinh_Nu.src = 'staff/nunvvesinh.png';
 
-// 2. Khai báo trạng thái hoạt động
-let veSinhPosX = 400; 
-let veSinhDirection = 1; 
-let guideGuestState = 'none';
-let guidePosX = 480; 
-let guidePosY = 450;
-let guestPosX = 480;
-let guestPosY = 50;
-let guidePathHistory = []; // Lưu lại đường đi của dẫn khách
-let guideTargetRoom = null;
-let cleanerPosX = 480;
-let cleanerPosY = 50;
-let cleanerState = 'none'; // Trạng thái: 'none', 'walking', 'cleaning'
-let cleanerTargetRoom = null;
-let cleanerTimer = 0; // Đếm ngược 10 giây
-let cleanerWaitTimer = 0; // Thời gian chờ trước khi nhân viên xuất hiện
-
-// ==========================================
-// CÁC HÀM VẼ NHÂN VIÊN (Dùng chung biến ctx từ script.js)
-// ==========================================
 function isImageReady(img) {
   return img && img.complete && img.naturalWidth !== 0;
 }
-// Vẽ bảo vệ ở tầng hầm
+
+// --- BIẾN DẪN KHÁCH ---
+let guideGuestState = 'none';
+let guidePosX = 480; 
+let guidePosY = 80;
+let guideTargetRoom = null;
+let guidePathHistory = []; 
+
+// --- BIẾN NHÂN VIÊN VỆ SINH (Lộ trình vòng quanh) ---
+let janitor1 = { floor: 2, x: 480, y: 80, pathStep: 0, state: 'walking', timer: 0 };
+let janitor2 = { floor: 5, x: 480, y: 80, pathStep: 0, state: 'walking', timer: 0 };
+
+// --- BIẾN NHÂN VIÊN DỌN PHÒNG ---
+let cleaner1 = { state: 'idle', floor: 0, x: 480, y: 80, targetRoom: null, targetY: 0, targetX: 0, timer: 0, phase: 'go_to_room', roomPos: 'center' };
+let cleaner2 = { state: 'idle', floor: 0, x: 480, y: 80, targetRoom: null, targetY: 0, targetX: 0, timer: 0, phase: 'go_to_room', roomPos: 'center' };
+
+// ==========================================
+// CÁC HÀM VẼ NHÂN VIÊN
+// ==========================================
+
 function drawSecurityGuard() {
-  if (staffImages.baoVe_Nam.complete) {
+  if (isImageReady(staffImages.baoVe_Nam)) {
     ctx.drawImage(staffImages.baoVe_Nam, 440, 450, 80, 80);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 12px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText("Bảo vệ", 480, 545);
+    label("Bảo vệ", 480, 545, 12, '#fff', 'center');
   }
 }
 
-// Vẽ nhân viên vệ sinh đi lại ở hành lang
 function drawJanitor() {
-  if (staffImages.veSinh_Nu.complete) {
-    ctx.drawImage(staffImages.veSinh_Nu, veSinhPosX, 400, 50, 50);
-    
-    // Vẽ tên
-    ctx.fillStyle = '#fca5a5';
-    ctx.font = 'bold 10px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText("Vệ sinh", veSinhPosX + 25, 390);
+  // Chỉ vẽ nhân viên vệ sinh nếu đang ở đúng tầng
+  if (currentFloor === janitor1.floor && isImageReady(staffImages.veSinh_Nu)) {
+    ctx.drawImage(staffImages.veSinh_Nu, janitor1.x, janitor1.y, 60, 60);
+    label("Vệ sinh", janitor1.x + 25, janitor1.y - 10, 10, '#fca5a5', 'center');
+  }
+  if (currentFloor === janitor2.floor && isImageReady(staffImages.veSinh_Nam)) {
+    ctx.drawImage(staffImages.veSinh_Nam, janitor2.x, janitor2.y, 60, 60);
+    label("Vệ sinh", janitor2.x + 25, janitor2.y - 10, 10, '#fca5a5', 'center');
   }
 }
 
-// Vẽ nhân viên dọn phòng (chỉ vẽ ở phòng đang cần dọn)
 function drawRoomCleaners(currentFloor, roomState) {
-  roomState.forEach(room => {
-    if (room.status === 'Cần dọn' && Math.floor(room.number / 100) === currentFloor) {
-      const roomIdx = roomState.indexOf(room);
-      const roomRow = roomIdx % 3; 
-      const isLeft = (roomIdx % 6) < 3;
-      
-      const roomX = isLeft ? (360 - 250 - 30) : (360 + 240 + 30);
-      const roomY = 70 + roomRow * (150 + 15);
-      
-      if (staffImages.donPhong_Nu.complete) {
-        ctx.drawImage(staffImages.donPhong_Nu, roomX + 100, roomY + 50, 50, 50);
+  const drawCleaner = (cleaner, img) => {
+    if (cleaner.state === 'walking') {
+      // Đang đi trên hành lang
+      if (isImageReady(img)) {
+        ctx.drawImage(img, cleaner.x, cleaner.y, 50, 50);
+        label("Dọn phòng", cleaner.x + 25, cleaner.y - 10, 12, '#10b981', 'center');
       }
-    }
-  });
-}
+    } else if (cleaner.state === 'cleaning') {
+      // Đang dọn bên trong phòng
+      const roomIdx = roomState.findIndex(r => r.number === cleaner.targetRoom);
+      if (roomIdx !== -1) {
+        const row = roomIdx % 3; 
+        const isLeft = (roomIdx % 6) < 3;
+        const roomX = isLeft ? (360 - 250 - 30) : (360 + 240 + 30);
+        const roomY = 70 + row * 165;
+        
+        // Tính vị trí dựa vào roomPos
+        let cx = roomX + 125; // Mặc định center
+        let cy = roomY + 75;
+        if (cleaner.roomPos === 'bed') { cx = roomX + 60; cy = roomY + 60; }
+        if (cleaner.roomPos === 'desk') { cx = roomX + 180; cy = roomY + 60; }
 
-// Vẽ nhân viên dẫn khách (ở sảnh hoặc trên hành lang)
-function drawGuide(currentFloor) {
-  if (currentFloor >= 2 && guideGuestState === 'to_room') {
-    
-    // VẼ NHÂN VIÊN
-    if (isImageReady(staffImages.danKhach_Nam)) {
-      ctx.drawImage(staffImages.danKhach_Nam, guidePosX, guidePosY, 60, 60);
-      label("Dẫn khách", guidePosX + 30, guidePosY - 10, 12, '#fff', 'center');
-    }
-
-    // VẼ KHÁCH ĐI THEO SAU (Bám đuôi theo trục Y và X)
-    if (window.tempGuestsForDrawing && window.tempGuestsForDrawing.length > 0) {
-      const guests = window.tempGuestsForDrawing;
-      const size = 50;
-      const spacing = 45; // Khoảng cách giữa các khách
-
-      for (let i = 0; i < guests.length; i++) {
-        // Tính toán vị trí của khách dựa trên vị trí hiện tại của nhân viên
-        let guestX = guidePosX;
-        let guestY = guidePosY - (i + 1) * spacing;
-
-        // Nếu nhân viên đã rẽ ngang, khách cũng phải đi lệch theo
-        if (guidePosY >= (130 + (roomState.findIndex(r => r.number === guideTargetRoom) % 3) * 165) - 5) {
-           // Khách đã xuống tới hàng phòng, bắt đầu đi ngang theo nhân viên
-           guestX = guidePosX - (i + 1) * spacing;
-           guestY = guidePosY;
+        if (isImageReady(img)) {
+          ctx.drawImage(img, cx - 25, cy - 25, 50, 50);
+          label("Đang dọn...", cx, cy - 35, 12, '#3b82f6', 'center');
         }
+      }
+    }
+  };
 
-        // Vẽ khách
-        ctx.drawImage(getGuestImage(guests[i]), guestX, guestY, size, size);
+  if (currentFloor === cleaner1.floor) drawCleaner(cleaner1, staffImages.donPhong_Nu);
+  if (currentFloor === cleaner2.floor) drawCleaner(cleaner2, staffImages.donPhong_Nam);
+}
+
+function drawGuide(currentFloor) {
+  if (guideGuestState === 'to_room') {
+    const targetFloor = Math.floor(guideTargetRoom / 100);
+    if (currentFloor === targetFloor) {
+      
+      const guests = window.tempGuestsForDrawing || [];
+      const size = 50;
+      
+      const roomIdx = roomState.findIndex(r => r.number === guideTargetRoom);
+      const isLeft = (roomIdx % 6) < 3;
+      const targetY = 130 + (roomIdx % 3) * 165;
+      const targetX = isLeft ? 360 : 600;
+
+      const isAtDoor = (guidePosX === targetX && guidePosY === targetY);
+
+      if (guests.length > 0) {
+        if (!isAtDoor) {
+          const delaySteps = 2; 
+          for (let i = 0; i < guests.length; i++) {
+            const historyIndex = (i + 1) * delaySteps;
+            if (guidePathHistory.length > historyIndex) {
+              const pastPos = guidePathHistory[historyIndex];
+              ctx.drawImage(getGuestImage(guests[i]), pastPos.x, pastPos.y, size, size);
+            }
+          }
+        } else {
+          const baseX = isLeft ? guidePosX + 40 : guidePosX - 40; 
+          const baseY = guidePosY;
+
+          for (let i = 0; i < guests.length; i++) {
+            let gx = baseX, gy = baseY;
+            const img = getGuestImage(guests[i]);
+
+            if (guests.length === 1) { gx = baseX; gy = baseY; }
+            else if (guests.length === 2) {
+              if (i === 0) { gx = baseX; gy = baseY - 30; } else { gx = baseX; gy = baseY + 30; }
+            } else if (guests.length === 3) {
+              if (i === 0) { gx = baseX + (isLeft ? -30 : 30); gy = baseY; }
+              else if (i === 1) { gx = baseX + (isLeft ? 15 : -15); gy = baseY - 30; }
+              else { gx = baseX + (isLeft ? 15 : -15); gy = baseY + 30; }
+            } else if (guests.length >= 4) {
+              if (i === 0) { gx = baseX + (isLeft ? -30 : 30); gy = baseY - 30; }
+              else if (i === 1) { gx = baseX + (isLeft ? 15 : -15); gy = baseY - 30; }
+              else if (i === 2) { gx = baseX + (isLeft ? -30 : 30); gy = baseY + 30; }
+              else { gx = baseX + (isLeft ? 15 : -15); gy = baseY + 30; }
+            }
+            ctx.drawImage(img, gx, gy, size, size);
+          }
+        }
+      }
+
+      if (isImageReady(staffImages.danKhach_Nam)) {
+        ctx.drawImage(staffImages.danKhach_Nam, guidePosX, guidePosY, 60, 60);
+        label("Dẫn khách", guidePosX + 30, guidePosY - 10, 12, '#fff', 'center');
       }
     }
   }
-// VẼ NHÂN VIÊN DỌN PHÒNG
-if (currentFloor >= 2 && (cleanerState === 'walking' || cleanerState === 'cleaning')) {
-  if (isImageReady(staffImages.donPhong_Nu)) { 
-    ctx.drawImage(staffImages.donPhong_Nu, cleanerPosX, cleanerPosY, 50, 50);
-    
-    if (cleanerState === 'cleaning') {
-      label("Đang dọn...", cleanerPosX + 25, cleanerPosY - 10, 12, '#10b981', 'center');
-    } else {
-      label("Dọn phòng", cleanerPosX + 25, cleanerPosY - 10, 12, '#10b981', 'center');
-    }
-  }
-}
 }
 
-// Hàm cập nhật chuyển động (Gọi trong setInterval của script.js)
+// ==========================================
+// HÀM CẬP NHẬT HOẠT ẢNH (LUÔN CHẠY NGẦM)
+// ==========================================
 function updateStaffAnimations() {
   let needsRedraw = false;
 
-  // 1. Vệ sinh đi lại
-  if (currentFloor >= 2) {
-    veSinhPosX += (veSinhDirection * 10);
-    if (veSinhPosX > 600) veSinhDirection = -1;
-    if (veSinhPosX < 350) veSinhDirection = 1;
-    needsRedraw = true;
+ // 1. NHÂN VIÊN VỆ SINH (Đi vòng quanh chữ O)
+[janitor1, janitor2].forEach(janitor => {
+  if (janitor.state === 'walking') {
+    const speed = 20;
+    // Lộ trình: Thang máy(480,80) -> x01(360,130) -> x03(360,460) -> x06(600,460) -> x04(600,130) -> Thang máy(480,80)
+    const path = [
+      { x: 360, y: 130 }, 
+      { x: 360, y: 460 }, 
+      { x: 540, y: 460 }, 
+      { x: 540, y: 130 }, 
+      { x: 480, y: 80 }
+    ];
+
+    if (janitor.pathStep < path.length) {
+      const target = path[janitor.pathStep];
+      if (janitor.x !== target.x) {
+        if (janitor.x < target.x) janitor.x = Math.min(janitor.x + speed, target.x);
+        else janitor.x = Math.max(janitor.x - speed, target.x);
+      } else if (janitor.y !== target.y) {
+        if (janitor.y < target.y) janitor.y = Math.min(janitor.y + speed, target.y);
+        else janitor.y = Math.max(janitor.y - speed, target.y);
+      } else {
+        janitor.pathStep++;
+      }
+    } else {
+      janitor.state = 'in_elevator';
+      janitor.timer = 3; 
+    }
+  } else if (janitor.state === 'in_elevator') {
+    janitor.timer--;
+    if (janitor.timer <= 0) {
+      janitor.floor = Math.floor(Math.random() * 5) + 2; 
+      janitor.x = 480; janitor.y = 80; janitor.pathStep = 0;
+      janitor.state = 'walking';
+    }
+  }
+});
+
+// 2. NHÂN VIÊN DỌN PHÒNG
+[cleaner1, cleaner2].forEach((cleaner, index) => {
+  
+  // Nếu đang rảnh, tìm phòng mới
+  if (cleaner.state === 'idle') {
+    const availableRooms = roomState.filter(r => {
+      // Chỉ lấy phòng đang cần dọn
+      if (r.status !== 'Cần dọn') return false;
+      
+      // Kiểm tra thời gian thực: Không lấy phòng mà nhân viên kia đang nhắm tới
+      const otherCleaner = index === 0 ? cleaner2 : cleaner1;
+      if (otherCleaner.targetRoom === r.number && otherCleaner.state !== 'idle') return false;
+      
+      return true;
+    });
+
+    let roomToClean = null;
+    if (availableRooms.length > 0) {
+      // Ưu tiên phòng cùng tầng
+      const sameFloorRoom = availableRooms.find(r => Math.floor(r.number / 100) === cleaner.floor);
+      roomToClean = sameFloorRoom ? sameFloorRoom : availableRooms[0];
+    }
+
+    if (roomToClean) {
+      cleaner.state = 'walking';
+      cleaner.phase = 'go_to_room';
+      cleaner.targetRoom = roomToClean.number;
+      cleaner.floor = Math.floor(roomToClean.number / 100);
+      cleaner.x = 480; cleaner.y = 80;
+      
+      const rIdx = roomState.findIndex(r => r.number === roomToClean.number);
+      const row = rIdx % 3;
+      const isLeft = (rIdx % 6) < 3;
+      cleaner.targetY = 130 + row * 165;
+      cleaner.targetX = isLeft ? 320 : 580; 
+    }
   }
 
-  // 2. Dẫn khách đi
-  if (currentFloor >= 2 && guideGuestState === 'to_room') {
+  // Di chuyển
+  if (cleaner.state === 'walking') {
+    const speed = 20;
+    if (cleaner.phase === 'go_to_room') {
+      if (cleaner.y < cleaner.targetY) {
+        cleaner.y = Math.min(cleaner.y + speed, cleaner.targetY);
+      } else if (cleaner.x !== cleaner.targetX) {
+        if (cleaner.x < cleaner.targetX) cleaner.x = Math.min(cleaner.x + speed, cleaner.targetX);
+        else cleaner.x = Math.max(cleaner.x - speed, cleaner.targetX);
+      } else {
+        // ĐÃ TỚI CỬA PHÒNG -> KIỂM TRA LẠI TRẠNG THÁI PHÒNG
+        const room = roomState.find(r => r.number === cleaner.targetRoom);
+        
+        if (room && room.status === 'Cần dọn') {
+          cleaner.state = 'cleaning';
+          cleaningProgressTimer = 10; 
+        } else {
+          // PHÒNG ĐÃ SẠCH (Do người khác dọn) -> QUAY VỀ THANG MÁY
+          cleaner.state = 'walking';
+          cleaner.phase = 'return_to_elevator';
+        }
+      }
+    } else if (cleaner.phase === 'return_to_elevator') {
+      if (cleaner.x !== 480) {
+        if (cleaner.x < 480) cleaner.x = Math.min(cleaner.x + speed, 480);
+        else cleaner.x = Math.max(cleaner.x - speed, 480);
+      } else if (cleaner.y > 80) {
+        cleaner.y = Math.max(cleaner.y - speed, 80);
+      } else {
+        cleaner.state = 'idle';
+        cleaner.targetRoom = null; 
+      }
+    }
+  }
+  
+  // Đang dọn
+  if (cleaner.state === 'cleaning') {
+    cleaningProgressTimer--; 
+    
+    // Mỗi 2 giây đổi vị trí trong phòng
+    if (cleaningProgressTimer % 2 === 0 && cleaningProgressTimer > 0) {
+      const positions = ['bed', 'desk', 'center'];
+      cleaner.roomPos = positions[Math.floor(Math.random() * positions.length)];
+    }
+
+    if (cleaningProgressTimer <= 0) {
+      const room = roomState.find(r => r.number === cleaner.targetRoom);
+      if (room) { 
+        room.status = 'Trống'; 
+        updateRating(0.1); 
+        showToast(`Phòng ${room.number} đã được dọn sạch!`); 
+      }
+      
+      const justCleanedRoom = cleaner.targetRoom;
+      cleaner.targetRoom = null; 
+      cleaner.roomPos = 'center'; 
+      
+      // Tìm phòng khác cùng tầng
+      const nextRooms = roomState.filter(r => 
+        r.status === 'Cần dọn' && 
+        Math.floor(r.number / 100) === cleaner.floor && 
+        r.number !== justCleanedRoom
+      );
+
+      if (nextRooms.length > 0) {
+        const nextRoom = nextRooms[0];
+        cleaner.targetRoom = nextRoom.number;
+        const rIdx = roomState.findIndex(r => r.number === nextRoom.number);
+        const row = rIdx % 3;
+        const isLeft = (rIdx % 6) < 3;
+        cleaner.targetY = 130 + row * 165;
+        cleaner.targetX = isLeft ? 320 : 580;
+        cleaner.state = 'walking';
+        cleaner.phase = 'go_to_room';
+      } else {
+        cleaner.state = 'walking';
+        cleaner.phase = 'return_to_elevator';
+      }
+    }
+  }
+}); // <--- ĐÂY LÀ DẤU NGOẶC ĐÓNG CỦA forEach (Đảm bảo bạn có dấu này)
+ 
+
+  // 3. DẪN KHÁCH (Giữ nguyên)
+  if (guideGuestState === 'to_room') {
     const roomIdx = roomState.findIndex(r => r.number === guideTargetRoom);
     if (roomIdx !== -1) {
       const row = roomIdx % 3; 
       const isLeft = (roomIdx % 6) < 3; 
       const targetY = 130 + row * 165; 
       const targetX = isLeft ? 360 : 600; 
-      const speed = 30; // Tốc độ vừa phải (không quá nhanh để khách theo kịp)
+      const speed = 30; 
 
-      // NHÂN VIÊN DI CHUYỂN
-      if (guidePosY < targetY) {
-        guidePosY = Math.min(guidePosY + speed, targetY);
-      } else if (guidePosX !== targetX) {
+      if (guidePosY < targetY) guidePosY = Math.min(guidePosY + speed, targetY);
+      else if (guidePosX !== targetX) {
         if (guidePosX < targetX) guidePosX = Math.min(guidePosX + speed, targetX);
         else guidePosX = Math.max(guidePosX - speed, targetX);
       }
 
-      // KIỂM TRA ĐẾN ĐÍCH
+      guidePathHistory.unshift({ x: guidePosX, y: guidePosY });
+      if (guidePathHistory.length > 300) guidePathHistory.pop();
+
       if (guidePosX === targetX && guidePosY === targetY) {
-        // Đợi 1 nhịp (khoảng 20 khung hình) để khách bước vào trong phòng
-        if (!window.arrivedTime) window.arrivedTime = Date.now();
-        if (Date.now() - window.arrivedTime > 2000) { // Đợi 2 giây
+        if (!window.guideArrivedTime) window.guideArrivedTime = Date.now();
+        if (Date.now() - window.guideArrivedTime > 1500) {
           guideGuestState = 'none'; 
-          
           const room = roomState[roomIdx];
           if (room && window.tempGuestsForDrawing) {
             room.guests = window.tempGuestsForDrawing;
-            room.guestPos = 'center';
+            room.guestPos = isLeft ? 'right' : 'left';
           }
-          currentGuest = null;
           window.tempGuestsForDrawing = null;
-          window.arrivedTime = null; // Reset
-          showToast(`Khách đã vào phòng ${guideTargetRoom} an toàn!`);
+          guidePathHistory = []; 
+          window.guideArrivedTime = null;
+          requestAnimationFrame(() => {
+            showToast(`Khách đã vào phòng ${guideTargetRoom} an toàn!`);
+            draw();
+          });
         }
       }
-      needsRedraw = true;
     }
   }
-// 3. NHÂN VIÊN DỌN PHÒNG TỰ ĐỘNG
-// Nếu có phòng cần dọn VÀ nhân viên đang rảnh
-if (cleanerState === 'none' && cleaningRoomNumber !== null) {
-  // Nếu chưa bắt đầu đếm ngược thời gian chờ, thì bắt đầu đếm (3 giây)
-  if (cleanerWaitTimer === 0) {
-    cleanerWaitTimer = 3; 
-  }
-  
-  cleanerWaitTimer--;
-  
-  // Khi hết thời gian chờ (3 giây), nhân viên mới xuất hiện
-  if (cleanerWaitTimer <= 0) {
-    cleanerState = 'walking';
-    cleanerTargetRoom = cleaningRoomNumber;
-    cleanerPosX = 480; // Xuất phát từ thang máy
-    cleanerPosY = 50;
-    cleanerWaitTimer = 0;
-    showToast("Nhân viên dọn phòng đang di chuyển tới...");
-  }
-  needsRedraw = true; // Cần vẽ lại để cập nhật trạng thái chờ
-}
 
-// Nhân viên bắt đầu đi bộ
-if (cleanerState === 'walking' && cleanerTargetRoom !== null) {
-  const roomIdx = roomState.findIndex(r => r.number === cleanerTargetRoom);
-  if (roomIdx !== -1) {
-    const row = roomIdx % 3; 
-    const isLeft = (roomIdx % 6) < 3; 
-    const targetY = 130 + row * 165; 
-    const targetX = isLeft ? 360 : 600; 
-    const speed = 15; 
-
-    if (cleanerPosY < targetY) {
-      cleanerPosY = Math.min(cleanerPosY + speed, targetY);
-    } else if (cleanerPosX !== targetX) {
-      if (cleanerPosX < targetX) cleanerPosX = Math.min(cleanerPosX + speed, targetX);
-      else cleanerPosX = Math.max(cleanerPosX - speed, targetX);
-    }
-
-    // Khi tới cửa phòng -> Bắt đầu dọn
-    if (cleanerPosX === targetX && cleanerPosY === targetY) {
-      cleanerState = 'cleaning';
-      cleanerTimer = 10; // 10 giây dọn dẹp
-      showToast(`Nhân viên đang dọn phòng ${cleanerTargetRoom} (10s)...`);
-    }
-  }
-  needsRedraw = true;
-}
-
-// Nhân viên đang dọn dẹp
-if (cleanerState === 'cleaning') {
-  cleanerTimer--;
-  
-  if (cleanerTimer <= 0) {
-    const roomToClean = roomState.find(r => r.number === cleanerTargetRoom);
-    if (roomToClean && roomToClean.status === 'Cần dọn') { 
-      roomToClean.status = 'Trống'; 
-      updateRating(0.1); 
-      showToast(`Phòng ${cleanerTargetRoom} đã được dọn sạch!`);
-    }
-    
-    // Reset mọi thứ
-    cleanerState = 'none';
-    cleanerTargetRoom = null;
-    cleaningRoomNumber = null; 
-    cleaningEndTime = 0;
-    cleanerWaitTimer = 0;
-  }
-  needsRedraw = true;
-}
-  
-  return needsRedraw;
+ return needsRedraw;
 }

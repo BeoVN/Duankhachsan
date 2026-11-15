@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#172638">
-<title>Khách sạn của tôi - v0.3.6</title>
+<title>Khách sạn của tôi - v0.3.8</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
     <div class="menu-buttons">
   <button class="btn-main" id="startBtn">▶ BẮT ĐẦU</button>
   <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
-  <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.3.6)</button>
+  <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.3.8)</button>
   
   <!-- KHUNG THÔNG TIN NGƯỜI CHƠI -->
   <div id="menuPlayerInfo" style="margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #456078; border-radius: 10px; text-align: left; font-size: 13px; color: #c9d8e6; display: flex; flex-direction: column; gap: 5px;">
@@ -60,7 +60,7 @@
       <span id="hudExp">0/100</span>
     </div>
     <div class="version" style="display:flex; align-items:center; gap:6px;">
-      v0.3.6
+      v0.3.8
       <!-- Nút Cài đặt thu nhỏ bằng icon bánh răng -->
       <span id="btnSettings" style="cursor:pointer; font-size:14px; background:#1a2b3d; border:1px solid #3a5068; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">⚙️</span>
     </div>
@@ -114,6 +114,7 @@
       <button class="tab" data-tab="receipt">🧾 Sao kê</button>
       <button class="tab" data-tab="messages">💬 Tin nhắn</button>
       <button class="tab" data-tab="diary">📖 Nhật ký</button>
+      <button class="tab" data-tab="profiles">📁 Hồ sơ khách</button>
     </div>
 
 <!-- Tab Đăng ký với 4 Form -->
@@ -302,7 +303,15 @@
         </div>
       </div>
     </div>
-
+    <div class="tab-content" id="tab-profiles">
+  <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; color:#1e3a52;">
+    <span>Lịch sử lưu trú</span>
+  </div>
+  <div id="profiles-list" style="max-height:250px; overflow-y:auto;">
+    <!-- Nội dung sẽ được điền bằng JS -->
+  </div>
+    </div>
+    
     <!-- 4. THANH NÚT BẤM DƯỚI CÙNG -->
     <div class="panel-actions" id="computerActions" style="justify-content:space-between;">
       <!-- Nút Đối chiếu & Xem Bill (Chỉ hiện ở Tab Đăng ký) -->
@@ -896,9 +905,14 @@
 <!-- ========================================== -->
 <!-- 3. GỌI CÁC FILE JAVASCRIPT -->
 <!-- ========================================== -->
-<script src="changelog.js"></script>
-<script src="draw_guests.js"></script> 
-<script src="draw_staff.js"></script> <!-- THÊM DÒNG NÀY -->
-<script src="script.js"></script>
+<script defer src="changelog.js"></script>
+<script defer src="draw_guests.js"></script>
+<script defer src="draw_staff.js"></script>
+
+<script defer src="script_core.js"></script>
+<script defer src="script_rooms.js"></script>
+<script defer src="script_system.js"></script>
+<script defer src="script_ui.js"></script>
+  
 </body>
 </html>

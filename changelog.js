@@ -18,7 +18,21 @@ function showChangelog() {
       <!-- PHIÊN BẢN MỚI NHẤT -->
 
 <details open>
-  <summary>Phiên bản 0.3.6 (Mới nhất)</summary>
+  <summary>Phiên bản 0.3.8 (Mới nhất)</summary>
+  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 23:30 - 15/11/2026</div>
+  <ul>
+    <li><b>Tất cả được tóm tắt bởi A.I</b></li>
+    <li>✅ <b>Hệ thống Hồ sơ Khách hàng:</b> Thêm tab Hồ sơ trong Máy tính. Tự động lưu trữ và phân loại lịch sử lưu trú theo từng ngày (Ngày mới nhất nằm trên cùng). Hiển thị chi tiết Tên, Tuổi, CCCD của từng khách trong phòng.</li>
+    <li>✅ <b>Lưu trữ Toàn diện:</b> Tất cả dữ liệu của các tab (Sao kê, Nhật ký, Hồ sơ) đều được lưu vào bộ nhớ (Auto-save). Không còn bị mất dữ liệu khi tải lại trang hay thoát game.</li>
+    <li>✅ <b>Nâng cấp Nhân viên Dọn phòng:</b> Hỗ trợ 2 nhân viên cùng lúc. Tự động chia việc thông minh, không bao giờ nhận trùng phòng. Có khả năng đi vào bên trong phòng và thay đổi vị trí dọn dẹp (giường, bàn, giữa phòng) mỗi 2 giây.</li>
+    <li>✅ <b>Lộ trình Nhân viên Vệ sinh:</b> 2 nhân viên vệ sinh di chuyển theo lộ trình chữ O (từ thang máy đi vòng quanh hành lang) và tự động vào thang máy đổi tầng ngẫu nhiên.</li>
+    <li>✅ <b>Hoạt ảnh Dẫn khách hoàn thiện:</b> Khách đi theo hiệu ứng Snake mượt mà. Khi đến cửa, khách tự động xếp thành đội hình (Tam giác/Vuông) và biến mất ngay lập tức khi thông báo "Khách đã vào phòng" xuất hiện.</li>
+    <li>✅ <b>Tối ưu & Sửa lỗi:</b> Chặn mở Máy tính/Kệ chìa khóa khi không ở Sảnh chính. Sửa lỗi đồng hồ đếm ngược dọn phòng bị reset. Sửa lỗi thời gian phòng bị nhảy khi tải lại game. Tinh chỉnh tọa độ nhân viên và khách đứng chuẩn xác.</li>
+    <li>✅ <b>Tối ưu hóa code:</b> Tách nhỏ file (modular hóa) giúp dễ quản lý và bảo trì, thêm thuộc tính nạp file an toàn.</li>
+  </ul>
+</details>
+<details open>
+  <summary>Phiên bản 0.3.6 </summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 00:00 - 12/11/2026</div>
   <ul>
     <li><b>Tất cả được tóm tắt bởi A.I</b></li>
