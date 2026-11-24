@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#172638">
-<title>Khách sạn của tôi - v0.3.8</title>
+<title>Khách sạn của tôi - v0.4.0</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,25 +17,39 @@
     <h1 class="game-title">KHÁCH SẠN<br>CỦA TÔI</h1>
     <p class="game-subtitle">Khách sạn của riêng bạn</p>
     <div class="menu-buttons">
-  <button class="btn-main" id="startBtn">▶ BẮT ĐẦU</button>
-  <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
-  <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.3.8)</button>
-  
-  <!-- KHUNG THÔNG TIN NGƯỜI CHƠI -->
-  <div id="menuPlayerInfo" style="margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #456078; border-radius: 10px; text-align: left; font-size: 13px; color: #c9d8e6; display: flex; flex-direction: column; gap: 5px;">
-    <div style="display: flex; justify-content: space-between;">
-      <span>👤 Tên: <b id="menuPlayerName" style="color: #ffdc7a;">Minh</b></span>
-      <span>⭐ Lv: <b id="menuPlayerLv" style="color: #ffdc7a;">1</b></span>
-    </div>
-    <div style="display: flex; justify-content: space-between;">
-      <span>🕒 Giờ: <b id="menuPlayerTime" style="color: #fff;">00:00</b></span>
-      <span>📅 Ngày: <b id="menuPlayerDate" style="color: #fff;">01/01/2024</b></span>
-    </div>
-    <div style="text-align: center; margin-top: 8px; border-top: 1px dashed #456078; padding-top: 8px;">
-      <span id="menuLoadSaveBtn" style="color: #ffdc7a; cursor: pointer; text-decoration: underline; font-weight: bold;">Khôi phục dữ liệu?</span>
+      <button class="btn-main" id="startBtn" disabled style="opacity:1;">▶ BẮT ĐẦU</button>
+      <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
+      <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.4.0)</button>
+      
+      <!-- KHUNG THÔNG TIN NGƯỜI CHƠI -->
+      <div id="menuPlayerInfo" style="margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #456078; border-radius: 10px; text-align: left; font-size: 13px; color: #c9d8e6; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; justify-content: space-between;">
+          <span>👤 Tên: <b id="menuPlayerName" style="color: #ffdc7a;">Minh</b></span>
+          <span>⭐ Lv: <b id="menuPlayerLv" style="color: #ffdc7a;">1</b></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>🕒 Giờ: <b id="menuPlayerTime" style="color: #fff;">00:00</b></span>
+          <span>📅 Ngày: <b id="menuPlayerDate" style="color: #fff;">01/01/2024</b></span>
+        </div>
+        <div style="text-align: center; margin-top: 8px; border-top: 1px dashed #456078; padding-top: 8px;">
+          <span id="menuLoadSaveBtn" style="color: #ffdc7a; cursor: pointer; text-decoration: underline; font-weight: bold;">Khôi phục dữ liệu?</span>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- THANH TẢI DỮ LIỆU (Nằm đè lên toàn bộ Menu) -->
+  <div id="loadingScreen" style="position:absolute; inset:0; background:#0f172a; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:1001; transition: opacity 0.5s ease;">
+    <h2 style="color:#ffdc7a; font-size:24px; margin-bottom:20px;">Đang tải dữ liệu...</h2>
+    <div style="width:200px; height:10px; background:#1e293b; border-radius:5px; overflow:hidden;">
+      <div id="loadingBar" style="width:0%; height:100%; background:#2c6e9e; transition: width 0.1s;"></div>
+    </div>
+    <div id="loadingText" style="color:#cbd5e1; font-size:12px; margin-top:10px; max-width:90%; text-align:center;">0%</div>
+    <div id="loadingError" style="display:none; max-width:90%; margin-top:14px; text-align:left;">
+      <div id="loadingErrorText" style="color:#fca5a5; font-size:13px; line-height:1.6; max-height:40vh; overflow-y:auto; margin-bottom:14px;"></div>
+      <button class="btn-sub" id="loadingRetryBtn" style="width:100%;">🔄 Tải lại</button>
+    </div>
+    <noscript><div style="color:#fca5a5; margin-top:14px;">Game cần bật JavaScript để chạy.</div></noscript>
   </div>
 </div>
 
@@ -47,9 +61,9 @@
  <!-- THANH HEADER -->
 <header class="hud">
   <div class="hud-top">
-    <div class="brand">SUNRISE HOTEL</div>
+    <div class="brand" id="hudHotelName">SUNRISE HOTEL</div>
     <div class="money-box"><b id="money">0đ</b></div>
-    <div class="rating-box">⭐ <b id="rating">3.0</b></div>
+    <div class="rating-box" id="ratingBox" style="cursor:pointer;" title="Xem đánh giá khách hàng">⭐ <b id="rating">3.0</b></div>
   </div>
   <div class="hud-bottom">
     <div class="player-info">
@@ -60,7 +74,7 @@
       <span id="hudExp">0/100</span>
     </div>
     <div class="version" style="display:flex; align-items:center; gap:6px;">
-      v0.3.8
+      v0.4.0
       <!-- Nút Cài đặt thu nhỏ bằng icon bánh răng -->
       <span id="btnSettings" style="cursor:pointer; font-size:14px; background:#1a2b3d; border:1px solid #3a5068; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">⚙️</span>
     </div>
@@ -84,7 +98,9 @@
       <div id="openCalendarBtn" style="font-size:10px; color:#d28a43; font-weight:bold; cursor:pointer; text-decoration:underline;">Xem lịch</div>
     </div>
 
-    <div id="toast"></div>
+   <div id="toast"></div>
+<!-- TOAST DÀNH RIÊNG CHO CÀI ĐẶT/MỞ RỘNG -->
+<div id="uiToast" style="position:absolute; bottom: 80px; left:50%; transform:translateX(-50%); padding:10px 16px; background:#2c6e9e; border:1px solid #1e4a6e; border-radius:10px; font-size:13px; text-align:center; z-index:99999; display:none; max-width:90%; pointer-events:none; font-weight:bold; color:white; box-shadow:0 4px 10px rgba(0,0,0,0.3);"></div>
 
     <!-- Nút tàng hình trên máy tính và kệ chìa khóa -->
     <button class="scene-btn" id="computerBtn" title="Mở máy tính"></button>
@@ -271,7 +287,7 @@
       <!-- Sơ đồ phòng (Giữ nguyên) -->
       <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; font-weight:bold; color:#1e3a52;">
         <span>Đang có khách: <span id="dash-occupied" style="color:#ef4444;">0 / 30</span></span>
-        <span>Doanh thu: <span id="dash-revenue" style="color:#2c6e9e;">0đ</span></span>
+        
       </div>
       <div class="rooms" id="dash-room-grid"></div>
     </div>
@@ -279,16 +295,36 @@
     <div class="tab-content" id="tab-receipt">
       <!-- Sao kê (Giữ nguyên) -->
       <div style="display:flex; justify-content:space-between; background:#f0f4f8; padding:10px; border-radius:8px; margin-bottom:10px; font-weight:bold; color:#1e3a52;">
-        <span>Khách sạn thu: <span id="bill-total" style="color:#2c6e9e;">0đ</span></span>
-        <span>Bạn nhận (40%): <span id="bill-comm" style="color:#e67e22;">0đ</span></span>
+        <span><span id="billLabelA">Khách sạn thu:</span> <span id="bill-total" style="color:#2c6e9e;">0đ</span></span>
+        <span><span id="billLabelB">Bạn nhận (40%):</span> <span id="bill-comm" style="color:#e67e22;">0đ</span></span>
       </div>
-      <div id="receipt-list" style="max-height:200px; overflow-y:auto;"></div>
+      <div id="bill-extra" style="display:none; justify-content:space-between; gap:8px; flex-wrap:wrap; background:#f8fafc; padding:8px 10px; border-radius:8px; margin-bottom:10px; font-size:12px; font-weight:bold; color:#1e3a52;"></div>
+      <div id="receipt-list" style="max-height:350px; width:100%; overflow-y:auto; box-sizing:border-box;"></div>
     </div>
 
-    <div class="tab-content" id="tab-messages">
-      <!-- Tin nhắn (Giữ nguyên) -->
-      <div class="msg"><div class="avatar">Q</div><div class="body"><div class="name">Quản lý</div><div class="text">Nhớ kiểm tra kỹ sơ đồ phòng trên máy tính nhé.</div></div><div class="time">08:00</div></div>
+   <div class="tab-content" id="tab-messages">
+  <div style="display:flex; gap:10px; margin-bottom:15px;">
+    <button class="btn-base msg-tab active" data-msg="internal" style="flex:1; padding:8px; font-size:13px;">💼 Nội bộ</button>
+    <button class="btn-base secondary msg-tab" data-msg="customer" style="flex:1; padding:8px; font-size:13px;">👤 Khách hàng</button>
+  </div>
+
+  <!-- Nội dung Tab Nội bộ -->
+  <div id="msg-internal" class="msg-content active" style="display:block;">
+    <!-- Tin nhắn sẽ hiện ở đây -->
+  </div>
+
+  <!-- Nội dung Tab Khách hàng -->
+  <div id="msg-customer" class="msg-content" style="display:none;">
+    <div class="msg">
+      <div class="avatar">Q</div>
+      <div class="body">
+        <div class="name">Quản lý</div>
+        <div class="text">Nhớ kiểm tra kỹ sơ đồ phòng trên máy tính nhé.</div>
+      </div>
+      <div class="time">08:00</div>
     </div>
+  </div>
+</div>
 
     <div class="tab-content" id="tab-diary">
       <!-- Nhật ký (Giữ nguyên) -->
@@ -307,9 +343,9 @@
   <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; color:#1e3a52;">
     <span>Lịch sử lưu trú</span>
   </div>
-  <div id="profiles-list" style="max-height:250px; overflow-y:auto;">
-    <!-- Nội dung sẽ được điền bằng JS -->
-  </div>
+  <div id="profiles-list" style="max-height:400px; width:100%; overflow-y:auto; box-sizing:border-box;">
+  <!-- Nội dung sẽ được điền bằng JS -->
+</div>
     </div>
     
     <!-- 4. THANH NÚT BẤM DƯỚI CÙNG -->
@@ -447,6 +483,17 @@
         <div id="calendarGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:5px; text-align:center; margin-top:15px; font-size:12px;"></div>
         <div class="panel-actions" style="justify-content:center; margin-top:15px;">
           <button class="btn-base secondary" id="closeCalendar">← Đóng</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="reviewPanel">
+      <div class="window" style="width:min(460px,100%);">
+        <h2 style="color:#1e3a52;">⭐ ĐÁNH GIÁ KHÁCH HÀNG</h2>
+        <div id="reviewSummary" style="text-align:center; font-size:13px; color:#475569; margin-bottom:8px;"></div>
+        <div id="reviewList"></div>
+        <div class="panel-actions" style="justify-content:center; margin-top:10px;">
+          <button class="btn-base secondary" id="closeReviewPanel">← Đóng</button>
         </div>
       </div>
     </section>
@@ -645,7 +692,7 @@
     </div>
   </div>
 </section>
-  <!-- BẢNG THÔNG TIN KHÁCH SẠN -->
+    <!-- BẢNG THÔNG TIN KHÁCH SẠN -->
 <section class="panel" id="hotelInfoPanel" style="z-index: 10005;">
   <div class="window" style="width:min(500px,100%); max-height:90dvh; display:flex; flex-direction:column;">
     <h2 style="color:#2c6e9e; border-bottom:2px dashed #ccc; padding-bottom:10px; flex-shrink: 0; margin-top:0;">🏨 THÔNG TIN KHÁCH SẠN</h2>
@@ -656,96 +703,239 @@
       <button class="btn-base secondary hotel-info-tab" data-info="manage" style="flex:1; padding:10px; font-size:14px;">Quản lý</button>
     </div>
 
-  <!-- Nội dung Tab Thông tin -->
-<div id="hotel-info-info" class="hotel-info-content active" style="flex:1; overflow-y:auto; padding-right:5px;">
-  <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #cbd5e1; display:flex; flex-direction:column; gap:10px; font-size:13px;">
-    
-    <!-- THÔNG TIN CHUNG -->
-    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
-      <span style="color:#64748b;">Tên khách sạn:</span> <b style="color:#1e3a52;">SUNRISE HOTEL</b>
-    </div>
-    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
-      <span style="color:#64748b;">Địa chỉ:</span> <b style="color:#1e3a52; text-align:right;">123 Đường Biển, TP. Nha Trang</b>
-    </div>
-    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
-      <span style="color:#64748b;">Số phòng:</span> <b style="color:#1e3a52;">30 phòng (5 tầng)</b>
-    </div>
-    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
-      <span style="color:#64748b;">Đánh giá:</span> <b id="infoRating" style="color:#e67e22;">5.0 ⭐</b>
-    </div>
-    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px; margin-bottom: 5px;">
-      <span style="color:#64748b;">Lưu lượng khách (24h):</span> <b id="infoTraffic" style="color:#2c6e9e;">0 khách</b>
-    </div>
-
-    <!-- CHI TIẾT GIÁ PHÒNG -->
-    <div style="border-bottom:1px dashed #eee; padding-bottom:8px; margin-bottom: 5px;">
-      <span style="color:#2c6e9e; display:block; margin-bottom:8px; font-weight:900; font-size:14px;">Bảng giá niêm yết:</span>
-      
-      <div style="display:flex; flex-direction:column; gap:8px; padding-left:5px; font-size:12px; color:#1e3a52;">
-        <!-- Phòng Đơn -->
-        <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
-          <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">🛏️ Phòng Đơn</b>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b>100.000đ/h</b></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b>700.000đ/đêm</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b>500.000đ/ngày</b></div>
+    <!-- Nội dung Tab Thông tin -->
+    <div id="hotel-info-info" class="hotel-info-content active" style="flex:1; overflow-y:auto; padding-right:5px;">
+      <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #cbd5e1; display:flex; flex-direction:column; gap:10px; font-size:13px;">
+        
+        <!-- THÔNG TIN CHUNG -->
+        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
+          <span style="color:#64748b;">Tên khách sạn:</span> <b id="infoHotelName" style="color:#1e3a52;">SUNRISE HOTEL</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
+          <span style="color:#64748b;">Địa chỉ:</span> <b style="color:#1e3a52; text-align:right;">123 Đường Biển, TP. Nha Trang</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
+          <span style="color:#64748b;">Số phòng:</span> <b style="color:#1e3a52;">30 phòng (5 tầng)</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
+          <span style="color:#64748b;">Đánh giá:</span> <b id="infoRating" style="color:#e67e22;">5.0 ⭐</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px; margin-bottom: 5px;">
+          <span style="color:#64748b;">Lưu lượng khách (24h):</span> <b id="infoTraffic" style="color:#2c6e9e;">0 khách</b>
         </div>
 
-        <!-- Phòng Đôi -->
-        <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
-          <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">🛏️🛏️ Phòng Đôi</b>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b>200.000đ/h</b></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b>1.100.000đ/đêm</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b>700.000đ/ngày</b></div>
+        <!-- CHI TIẾT GIÁ PHÒNG -->
+        <div style="border-bottom:1px dashed #eee; padding-bottom:8px; margin-bottom: 5px;">
+          <span style="color:#2c6e9e; display:block; margin-bottom:8px; font-weight:900; font-size:14px;">Bảng giá niêm yết:</span>
+          
+          <div style="display:flex; flex-direction:column; gap:8px; padding-left:5px; font-size:12px; color:#1e3a52;">
+            <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">🛏️ Phòng Đơn</b>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b id="infoPriceDon_hour">100.000đ/h</b></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b id="infoPriceDon_night">700.000đ/đêm</b></div>
+              <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b id="infoPriceDon_day">500.000đ/ngày</b></div>
+            </div>
+
+            <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">🛏️🛏️ Phòng Đôi</b>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b id="infoPriceDoi_hour">200.000đ/h</b></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b id="infoPriceDoi_night">1.100.000đ/đêm</b></div>
+              <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b id="infoPriceDoi_day">700.000đ/ngày</b></div>
+            </div>
+
+            <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">👑 Phòng VIP</b>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b id="infoPriceVip_hour">250.000đ/h</b></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b id="infoPriceVip_night">1.300.000đ/đêm</b></div>
+              <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b id="infoPriceVip_day">900.000đ/ngày</b></div>
+            </div>
+
+            <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">💖 Phòng Lãng Mạn</b>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b id="infoPriceLangMan_hour">300.000đ/h</b></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b id="infoPriceLangMan_night">1.500.000đ/đêm</b></div>
+              <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b id="infoPriceLangMan_day">950.000đ/ngày</b></div>
+            </div>
+
+            <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">🏛️ Phòng Tổng Thống</b>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b id="infoPriceTongThong_hour">500.000đ/h</b></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b id="infoPriceTongThong_night">2.000.000đ/đêm</b></div>
+              <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b id="infoPriceTongThong_day">1.500.000đ/ngày</b></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Phòng VIP -->
-        <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
-          <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">👑 Phòng VIP</b>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b>250.000đ/h</b></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b>1.300.000đ/đêm</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b>900.000đ/ngày</b></div>
+        <!-- CHI TIẾT KHUYẾN MÃI -->
+        <div>
+          <span style="color:#2c6e9e; display:block; margin-bottom:8px; font-weight:900; font-size:14px;">Ưu đãi:</span>
+          <div style="display:flex; flex-direction:column; gap:5px; padding-left:5px; font-size:12px; color:#ef4444; background:#fef2f2; padding:10px; border-radius:6px; border:1px solid #fecaca;">
+            <div style="display:flex; justify-content:space-between;"><span>👥 Đi 2 người:</span> <b>Giảm 10%</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>👨‍👩‍👦 Đi 3 người:</span> <b>Giảm 20%</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>👨‍👩‍👧‍👦 Đi 4 người:</span> <b>Giảm 30%</b></div>
+            <div style="display:flex; justify-content:space-between; border-top:1px dashed #fca5a5; padding-top:5px; margin-top:5px;">
+              <span>🎟️ Mã giảm giá:</span> <b id="infoVoucherText">Chưa có mã</b>
+            </div>
+            <div id="infoVoucherList" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;"></div>
+          </div>
         </div>
 
-        <!-- Phòng Lãng Mạn -->
-        <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
-          <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">💖 Phòng Lãng Mạn</b>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b>300.000đ/h</b></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b>1.500.000đ/đêm</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b>950.000đ/ngày</b></div>
-        </div>
-
-        <!-- Phòng Tổng Thống -->
-        <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">
-          <b style="color:#1e3a52; display:block; margin-bottom:4px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">🏛️ Phòng Tổng Thống</b>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>⏱️ Theo giờ:</span> <b>500.000đ/h</b></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>🌙 Qua đêm:</span> <b>2.000.000đ/đêm</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>📅 Dài hạn:</span> <b>1.500.000đ/ngày</b></div>
-        </div>
       </div>
     </div>
 
-    <!-- CHI TIẾT KHUYẾN MÃI -->
-    <div>
-      <span style="color:#2c6e9e; display:block; margin-bottom:8px; font-weight:900; font-size:14px;">Ưu đãi đoàn đông:</span>
-      <div style="display:flex; flex-direction:column; gap:5px; padding-left:5px; font-size:12px; color:#ef4444; background:#fef2f2; padding:10px; border-radius:6px; border:1px solid #fecaca;">
-        <div style="display:flex; justify-content:space-between;"><span>👥 Đi 2 người:</span> <b>Giảm 10%</b></div>
-        <div style="display:flex; justify-content:space-between;"><span>👨‍👩‍👦 Đi 3 người:</span> <b>Giảm 20%</b></div>
-        <div style="display:flex; justify-content:space-between;"><span>👨‍👩‍👧‍👦 Đi 4 người:</span> <b>Giảm 30%</b></div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-    <!-- Nội dung Tab Quản lý (Bị khóa) -->
+    <!-- Nội dung Tab Quản lý -->
     <div id="hotel-info-manage" class="hotel-info-content" style="flex:1; display:none; overflow-y:auto; padding-right:5px;">
-      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:#64748b; padding:20px;">
+
+      <!-- KHỐI NHẬP LIỆU -->
+      <div id="manageInputs" style="display:none; flex-direction:column; gap:15px;">
+        
+        <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #cbd5e1;">
+          <h3 style="font-size:14px; color:#2c6e9e; margin-top:0; margin-bottom:10px;">🏨 Tên Khách sạn</h3>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="inputHotelName" class="input-field" style="flex:1;" placeholder="">
+            <button class="btn-base" id="saveHotelNameBtn" style="padding:0 15px;">Lưu</button>
+          </div>
+        </div>
+
+        <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #cbd5e1;">
+          <h3 style="font-size:14px; color:#2c6e9e; margin-top:0; margin-bottom:5px;">💰 Tùy chỉnh Giá Phòng</h3>
+          <p style="font-size:11px; color:#888; margin-bottom:10px; font-style:italic;">*Lưu ý: Nếu giá quá cao, khách sẽ chê mắc và không đến.</p>
+          
+          <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="font-size:13px; color:#1e3a52; display:block; margin-bottom:8px;">Phòng Đơn</b>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Theo giờ:</span>
+                <input type="text" id="priceDon_hour" class="input-field price-input" style="flex:1; font-size:13px;" data-original="100000">
+                <span style="font-size:12px; margin-left:5px;">đ/h</span>
+              </div>
+              <div id="warnDon_hour" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Qua đêm:</span>
+                <input type="text" id="priceDon_night" class="input-field price-input" style="flex:1; font-size:13px;" data-original="700000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnDon_night" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:12px; width:70px;">Dài hạn:</span>
+                <input type="text" id="priceDon_day" class="input-field price-input" style="flex:1; font-size:13px;" data-original="500000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnDon_day" style="font-size:11px; color:#ef4444; display:none; text-align:right;"></div>
+            </div>
+            <div style="background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="font-size:13px; color:#1e3a52; display:block; margin-bottom:8px;">Phòng Đôi</b>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Theo giờ:</span>
+                <input type="text" id="priceDoi_hour" class="input-field price-input" style="flex:1; font-size:13px;" data-original="200000">
+                <span style="font-size:12px; margin-left:5px;">đ/h</span>
+              </div>
+              <div id="warnDoi_hour" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Qua đêm:</span>
+                <input type="text" id="priceDoi_night" class="input-field price-input" style="flex:1; font-size:13px;" data-original="1100000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnDoi_night" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:12px; width:70px;">Dài hạn:</span>
+                <input type="text" id="priceDoi_day" class="input-field price-input" style="flex:1; font-size:13px;" data-original="700000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnDoi_day" style="font-size:11px; color:#ef4444; display:none; text-align:right;"></div>
+            </div>
+            <div style="background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="font-size:13px; color:#1e3a52; display:block; margin-bottom:8px;">Phòng VIP</b>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Theo giờ:</span>
+                <input type="text" id="priceVip_hour" class="input-field price-input" style="flex:1; font-size:13px;" data-original="250000">
+                <span style="font-size:12px; margin-left:5px;">đ/h</span>
+              </div>
+              <div id="warnVip_hour" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Qua đêm:</span>
+                <input type="text" id="priceVip_night" class="input-field price-input" style="flex:1; font-size:13px;" data-original="1300000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnVip_night" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:12px; width:70px;">Dài hạn:</span>
+                <input type="text" id="priceVip_day" class="input-field price-input" style="flex:1; font-size:13px;" data-original="900000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnVip_day" style="font-size:11px; color:#ef4444; display:none; text-align:right;"></div>
+            </div>
+            <div style="background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="font-size:13px; color:#1e3a52; display:block; margin-bottom:8px;">Phòng Lãng Mạn</b>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Theo giờ:</span>
+                <input type="text" id="priceLangMan_hour" class="input-field price-input" style="flex:1; font-size:13px;" data-original="300000">
+                <span style="font-size:12px; margin-left:5px;">đ/h</span>
+              </div>
+              <div id="warnLangMan_hour" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Qua đêm:</span>
+                <input type="text" id="priceLangMan_night" class="input-field price-input" style="flex:1; font-size:13px;" data-original="1500000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnLangMan_night" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:12px; width:70px;">Dài hạn:</span>
+                <input type="text" id="priceLangMan_day" class="input-field price-input" style="flex:1; font-size:13px;" data-original="950000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnLangMan_day" style="font-size:11px; color:#ef4444; display:none; text-align:right;"></div>
+            </div>
+            <div style="background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+              <b style="font-size:13px; color:#1e3a52; display:block; margin-bottom:8px;">Phòng Tổng Thống</b>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Theo giờ:</span>
+                <input type="text" id="priceTongThong_hour" class="input-field price-input" style="flex:1; font-size:13px;" data-original="1500000">
+                <span style="font-size:12px; margin-left:5px;">đ/h</span>
+              </div>
+              <div id="warnTongThong_hour" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:12px; width:70px;">Qua đêm:</span>
+                <input type="text" id="priceTongThong_night" class="input-field price-input" style="flex:1; font-size:13px;" data-original="2000000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnTongThong_night" style="font-size:11px; color:#ef4444; display:none; text-align:right; margin-bottom:5px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:12px; width:70px;">Dài hạn:</span>
+                <input type="text" id="priceTongThong_day" class="input-field price-input" style="flex:1; font-size:13px;" data-original="1500000">
+                <span style="font-size:12px; margin-left:5px;">đ</span>
+              </div>
+              <div id="warnTongThong_day" style="font-size:11px; color:#ef4444; display:none; text-align:right;"></div>
+            </div>
+          </div>
+          <button class="btn-base" id="savePricesBtn" style="margin-top:15px; width:100%;">Lưu Bảng Giá</button>
+        </div>
+
+        <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #cbd5e1;">
+          <h3 style="font-size:14px; color:#2c6e9e; margin-top:0; margin-bottom:10px;">🎟️ Tạo Mã Giảm Giá</h3>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="voucherCode" class="input-field" placeholder="Mã (VD: SUMMER2024)">
+            <input type="number" id="voucherDiscount" class="input-field" placeholder="Giảm giá (VD: 10)">
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1; min-width:0;"><div style="font-size:11px; color:#64748b; margin-bottom:3px;">Từ ngày</div><input type="date" id="voucherStart" class="input-field" style="width:100%;"></div>
+              <div style="flex:1; min-width:0;"><div style="font-size:11px; color:#64748b; margin-bottom:3px;">Đến ngày</div><input type="date" id="voucherEnd" class="input-field" style="width:100%;"></div>
+            </div>
+            <button class="btn-base" id="createVoucherBtn">Tạo Mã</button>
+          </div>
+          <div id="voucherList" style="margin-top:15px;"></div>
+        </div>
+
+      </div> <!-- ĐÓNG KHỐI NHẬP LIỆU -->
+
+      <!-- KHỐI Ổ KHÓA -->
+      <div id="manageLock" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:250px; text-align:center; color:#64748b; padding:20px;">
         <div style="font-size:50px; margin-bottom:10px;">🔒</div>
         <h3 style="font-size:16px; color:#ef4444; margin-bottom:5px;">Tính năng bị khóa</h3>
         <p style="font-size:13px; font-weight:bold;">Yêu cầu người chơi sở hữu khách sạn này!</p>
         <p style="font-size:12px; margin-top:5px;">(Hãy sử dụng chức năng "Mua lại khách sạn" để mở khóa)</p>
       </div>
-    </div>
+
+    </div> <!-- ĐÓNG TAB QUẢN LÝ -->
 
     <!-- Nút Đóng -->
     <div class="panel-actions" style="justify-content:center; flex-shrink:0; border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">
@@ -753,6 +943,7 @@
     </div>
   </div>
 </section>
+  
   <!-- BẢNG THÔNG TIN NHÂN VIÊN -->
 <section class="panel" id="staffPanel" style="z-index: 10005;">
   <div class="window" style="width:min(500px,100%); max-height:90dvh; display:flex; flex-direction:column;">
@@ -764,100 +955,109 @@
       <button class="btn-base secondary staff-tab" data-staff="manage" style="flex:1; padding:10px; font-size:14px;">Quản lý</button>
     </div>
 
-    <!-- Nội dung Tab Thông tin -->
-    <div id="staff-info-info" class="staff-content active" style="flex:1; overflow-y:auto; padding-right:5px;">
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        
-        <!-- Lễ tân -->
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #3b82f6;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <b style="color:#1e3a52; font-size:14px;">💁‍♂️ Lễ tân (Tôi)</b>
-            <span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/1</span>
-          </div>
-          <div style="font-size:13px; color:#475569;">
-            Tên: <b id="staffReceptionistName">Minh</b> - Tuổi: <b id="staffReceptionistAge">25</b> - Trạng thái: 🟢 Đang làm việc
-          </div>
-        </div>
-
-        <!-- Bảo vệ -->
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #64748b;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <b style="color:#1e3a52; font-size:14px;">🛡️ Bảo vệ</b>
-            <span style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/1</span>
-          </div>
-          <div style="font-size:13px; color:#475569;">
-            Tên: <b>Hùng</b> - Tuổi: <b>35</b> - Trạng thái: 🟢 Đang làm việc
-          </div>
-        </div>
-
-        <!-- Nhân viên vệ sinh -->
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #10b981;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <b style="color:#1e3a52; font-size:14px;">🧹 Nhân viên vệ sinh</b>
-            <span style="background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">2/2</span>
-          </div>
-          <div style="font-size:13px; color:#475569; display:flex; flex-direction:column; gap:3px;">
-            <span>1. Tên: <b>Lan</b> - Tuổi: <b>28</b> - Trạng thái: 🟢 Đang làm việc</span>
-            <span>2. Tên: <b>Mai</b> - Tuổi: <b>32</b> - Trạng thái: 🔴 Đang nghỉ việc</span>
-          </div>
-        </div>
-
-        <!-- Nhân viên dọn phòng -->
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #8b5cf6;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <b style="color:#1e3a52; font-size:14px;">🛏️ Nhân viên dọn phòng</b>
-            <span style="background:#ede9fe; color:#5b21b6; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">2/2</span>
-          </div>
-          <div style="font-size:13px; color:#475569; display:flex; flex-direction:column; gap:3px;">
-            <span>1. Tên: <b>Hoa</b> - Tuổi: <b>40</b> - Trạng thái: 🟢 Đang làm việc</span>
-            <span>2. Tên: <b>Thảo</b> - Tuổi: <b>24</b> - Trạng thái: 🟢 Đang làm việc</span>
-          </div>
-        </div>
-
-        <!-- Nhân viên dẫn khách -->
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #f59e0b;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <b style="color:#1e3a52; font-size:14px;">🚶‍♂️ Nhân viên dẫn khách</b>
-            <span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/1</span>
-          </div>
-          <div style="font-size:13px; color:#475569;">
-            Tên: <b>Tuấn</b> - Tuổi: <b>22</b> - Trạng thái: 🟢 Đang làm việc
-          </div>
-        </div>
-
-        <!-- Quản lý -->
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #ef4444;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <b style="color:#1e3a52; font-size:14px;">👔 Quản lý</b>
-            <span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/1</span>
-          </div>
-          <div style="font-size:13px; color:#475569;">
-            Tên: <b>Trưởng phòng Nam</b> - Tuổi: <b>45</b> - Trạng thái: 🟢 Đang làm việc
-          </div>
-        </div>
-
-        <!-- Chủ khách sạn -->
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #eab308;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <b style="color:#1e3a52; font-size:14px;">👑 Chủ khách sạn</b>
-            <span style="background:#fef9c3; color:#854d0e; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/1</span>
-          </div>
-          <div style="font-size:13px; color:#475569;">
-            Tên: <b>Ông Đạt</b> - Tuổi: <b>50</b> - Trạng thái: 🟢 Đang làm việc
-          </div>
-        </div>
-
+   <!-- Nội dung Tab Thông tin -->
+<div id="staff-info-info" class="staff-content active" style="flex:1; overflow-y:auto; padding-right:5px;">
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    
+    <!-- Lễ tân -->
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #3b82f6;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <b style="color:#1e3a52; font-size:14px;">💁‍♂️ Lễ tân (Tôi)</b>
+        <span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/2</span>
+      </div>
+      <div style="font-size:13px; color:#475569;">
+        Tên: <b id="staffReceptionistName">Minh</b> - Tuổi: <b id="staffReceptionistAge">25</b><br>
+        Ca làm: <b>Hành chính</b> - Trạng thái: <b style="color:#22c55e;">🟢 Đang trong ca</b>
       </div>
     </div>
 
+    <!-- Bảo vệ -->
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #64748b;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <b style="color:#1e3a52; font-size:14px;">🛡️ Bảo vệ</b>
+        <span style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">2/2</span>
+      </div>
+      <div style="font-size:13px; color:#475569; display:flex; flex-direction:column; gap:5px;">
+        <span>1. Tên: <b>Hùng</b> - Tuổi: 35 - Ca: <b>Ngày</b> - <b style="color:#22c55e;">🟢 Đang trong ca</b></span>
+        <span>2. Tên: <b>Tuấn</b> - Tuổi: 28 - Ca: <b>Đêm</b> - <b style="color:#ef4444;">🔴 Đang hết ca</b></span>
+      </div>
+    </div>
+
+    <!-- Nhân viên vệ sinh -->
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #10b981;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <b style="color:#1e3a52; font-size:14px;">🧹 Nhân viên vệ sinh</b>
+        <span style="background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">4/4</span>
+      </div>
+      <div style="font-size:13px; color:#475569; display:flex; flex-direction:column; gap:5px;">
+        <span>1. Tên: <b>Lan</b> - Tuổi: 28 - Ca: <b>Ngày</b> - <b style="color:#22c55e;">🟢 Đang trong ca</b></span>
+        <span>2. Tên: <b>Mai</b> - Tuổi: 32 - Ca: <b>Đêm</b> - <b style="color:#f59e0b;">🟡 Đang nghỉ phép</b></span>
+        <span>3. Tên: <b>Hoa</b> - Tuổi: 40 - Ca: <b>Ngày</b> - <b style="color:#22c55e;">🟢 Đang trong ca</b></span>
+        <span>4. Tên: <b>Thảo</b> - Tuổi: 24 - Ca: <b>Đêm</b> - <b style="color:#ef4444;">🔴 Đang hết ca</b></span>
+      </div>
+    </div>
+
+    <!-- Nhân viên dọn phòng -->
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #8b5cf6;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <b style="color:#1e3a52; font-size:14px;">🛏️ Nhân viên dọn phòng</b>
+        <span style="background:#ede9fe; color:#5b21b6; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">4/4</span>
+      </div>
+      <div style="font-size:13px; color:#475569; display:flex; flex-direction:column; gap:5px;">
+        <span>1. Tên: <b>Hoa</b> - Tuổi: 40 - Ca: <b>Ngày</b> - <b style="color:#22c55e;">🟢 Đang trong ca</b></span>
+        <span>2. Tên: <b>Thảo</b> - Tuổi: 24 - Ca: <b>Đêm</b> - <b style="color:#22c55e;">🟢 Đang trong ca</b></span>
+        <span>3. Tên: <b>Hạnh</b> - Tuổi: 30 - Ca: <b>Ngày</b> - <b style="color:#ef4444;">🔴 Đang hết ca</b></span>
+        <span>4. Tên: <b>Trang</b> - Tuổi: 26 - Ca: <b>Đêm</b> - <b style="color:#ef4444;">🔴 Đang hết ca</b></span>
+      </div>
+    </div>
+
+    <!-- Nhân viên dẫn khách -->
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #f59e0b;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <b style="color:#1e3a52; font-size:14px;">🚶‍♂️ Nhân viên dẫn khách</b>
+        <span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">0/2</span>
+      </div>
+      <div style="font-size:13px; color:#475569; text-align:center; padding:10px; font-style:italic;">
+        Hiện chưa có nhân viên cho vị trí này.
+      </div>
+    </div>
+
+    <!-- Quản lý -->
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #ef4444;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <b style="color:#1e3a52; font-size:14px;">👔 Quản lý</b>
+        <span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/1</span>
+      </div>
+      <div style="font-size:13px; color:#475569;">
+        Tên: <b>Trưởng phòng Nam</b> - Tuổi: 45 - Ca: <b>Hành chính</b> - <b style="color:#22c55e;">🟢 Đang trong ca</b>
+      </div>
+    </div>
+
+    <!-- Chủ khách sạn -->
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; border-left:4px solid #eab308;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <b style="color:#1e3a52; font-size:14px;">👑 Chủ khách sạn</b>
+        <span style="background:#fef9c3; color:#854d0e; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">1/1</span>
+      </div>
+      <div style="font-size:13px; color:#475569;">
+        Tên: <b>Ông Đạt</b> - Tuổi: 50 - <b style="color:#ef4444;">🔴 Sắp nghỉ việc (1 ngày)</b>
+      </div>
+    </div>
+
+  </div>
+</div>
+
     <!-- Nội dung Tab Quản lý (Bị khóa) -->
     <div id="staff-info-manage" class="staff-content" style="flex:1; display:none; overflow-y:auto; padding-right:5px;">
+      <div id="staffManageLock">
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:#64748b; padding:20px;">
         <div style="font-size:50px; margin-bottom:10px;">🔒</div>
         <h3 style="font-size:16px; color:#ef4444; margin-bottom:5px;">Tính năng bị khóa</h3>
         <p style="font-size:13px; font-weight:bold;">Yêu cầu người chơi sở hữu khách sạn này!</p>
         <p style="font-size:12px; margin-top:5px;">(Hãy sử dụng chức năng "Mua lại khách sạn" để mở khóa)</p>
       </div>
+      </div>
+      <div id="staffManageContent" style="display:none;"></div>
     </div>
 
     <!-- Nút Đóng -->
@@ -905,14 +1105,7 @@
 <!-- ========================================== -->
 <!-- 3. GỌI CÁC FILE JAVASCRIPT -->
 <!-- ========================================== -->
-<script defer src="changelog.js"></script>
-<script defer src="draw_guests.js"></script>
-<script defer src="draw_staff.js"></script>
-
-<script defer src="script_core.js"></script>
-<script defer src="script_rooms.js"></script>
-<script defer src="script_system.js"></script>
-<script defer src="script_ui.js"></script>
-  
+<!-- Bộ nạp tự động tải toàn bộ file trong thư mục js/ (xem danh sách trong js/loader.js) -->
+<script src="js/loader.js"></script>
 </body>
 </html>
