@@ -12,10 +12,10 @@ let MY_AGE = 25;
 let isGameStarted = false;
 let isGamePaused = false;
 let pauseStartTime = 0;
-let playerLevel = 5;
+let playerLevel = 1;
 let playerExp = 0;
 let maxExp = 100; 
-let hotelRating = 5.0; // = điểm trung bình các đánh giá của khách
+let hotelRating = 3.0; // = điểm trung bình các đánh giá của khách
 let reviewSum = 0;      // Tổng số sao đã nhận
 let reviewCount = 0;    // Số lượt đánh giá
 let guestReviews = []; // Các đánh giá chi tiết của khách (hiển thị ở bảng Đánh giá khách hàng)
@@ -72,7 +72,7 @@ function showToast(t){ toast.textContent = t; toast.style.display = 'block'; cle
 // Hàm hiển thị Toast cho Cài đặt/Mở rộng (Nằm phía trên nút bấm)
 
 function updateMoneyUI() {
-  document.getElementById('money').innerText = playerMoney.toLocaleString('vi-VN') + 'đ';
+  document.getElementById('money').innerText = fmtVND(playerMoney);
   document.getElementById('dash-occupied').innerText = occupiedRooms + ' / 30';
   
 }

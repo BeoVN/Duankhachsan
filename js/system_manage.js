@@ -43,11 +43,17 @@ document.getElementById('savePricesBtn').onclick = () => {
     return parseInt(el.value.replace(/\./g, '')) || 0;
   };
 
-  customPrices["Phòng Đơn"] = { hour: getVal('priceDon_hour'), night: getVal('priceDon_night'), day: getVal('priceDon_day') };
-  customPrices["Phòng Đôi"] = { hour: getVal('priceDoi_hour'), night: getVal('priceDoi_night'), day: getVal('priceDoi_day') };
-  customPrices["Phòng VIP"] = { hour: getVal('priceVip_hour'), night: getVal('priceVip_night'), day: getVal('priceVip_day') };
-  customPrices["Phòng Lãng Mạn"] = { hour: getVal('priceLangMan_hour'), night: getVal('priceLangMan_night'), day: getVal('priceLangMan_day') };
-  customPrices["Phòng Tổng Thống"] = { hour: getVal('priceTongThong_hour'), night: getVal('priceTongThong_night'), day: getVal('priceTongThong_day') };
+  const newPrices = {
+    "Phòng Đơn": { hour: getVal('priceDon_hour'), night: getVal('priceDon_night'), day: getVal('priceDon_day') },
+    "Phòng Đôi": { hour: getVal('priceDoi_hour'), night: getVal('priceDoi_night'), day: getVal('priceDoi_day') },
+    "Phòng VIP": { hour: getVal('priceVip_hour'), night: getVal('priceVip_night'), day: getVal('priceVip_day') },
+    "Phòng Lãng Mạn": { hour: getVal('priceLangMan_hour'), night: getVal('priceLangMan_night'), day: getVal('priceLangMan_day') },
+    "Phòng Tổng Thống": { hour: getVal('priceTongThong_hour'), night: getVal('priceTongThong_night'), day: getVal('priceTongThong_day') }
+  };
+  // Giá không được vượt mức tối đa theo số sao hiện tại của khách sạn
+  const capError = validatePriceCaps(newPrices);
+  if (capError) { showCustomAlert('Không thể lưu bảng giá!<br><br>' + capError + '<br><br>Hãy hạ giá xuống hoặc nâng sao khách sạn để được đặt giá cao hơn.'); return; }
+  Object.keys(newPrices).forEach(name => { customPrices[name] = newPrices[name]; });
 
   refreshHotelInfoPrices();
   showUiToast("Đã cập nhật bảng giá mới!");

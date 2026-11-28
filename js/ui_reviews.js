@@ -15,6 +15,7 @@ function closeReviewPanel() { document.getElementById('reviewPanel').classList.r
 })();
 
 function updateReviewSummary() {
+  recalcHotelRating();
   const el = document.getElementById('reviewSummary'); if (!el) return;
   el.innerHTML = `<span style="font-size:26px; font-weight:900; color:#e67e22;">${hotelRating.toFixed(1)}</span> ⭐ &nbsp;·&nbsp; ${reviewCount} lượt đánh giá`;
 }
@@ -27,11 +28,7 @@ function reviewCardHTML(rv) {
   const bubble = (c) => c.from === 'player'
     ? `<div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:5px 8px; margin:4px 0 4px 24px; font-size:12px;"><b style="color:#c2410c;">Khách sạn:</b> ${staffEsc(c.text)}</div>`
     : `<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:5px 8px; margin:4px 24px 4px 0; font-size:12px;"><b style="color:#1d4ed8;">${staffEsc(rv.name)}:</b> ${staffEsc(c.text)}</div>`;
-  let recLine = '';
-  if (rv.recName) {
-    const p = (staffList.leTan || []).find(x => x.id === rv.recId);
-    recLine = `<div style="font-size:11px; color:#64748b; margin-top:4px;">💁 Lễ tân phục vụ: <b>${staffEsc(rv.recName)}</b>${p ? ` (⭐ ${staffAvgRating(p).toFixed(1)})` : ''}</div>`;
-  }
+  const recLine = '';
   const editedLine = rv.edited && rv.stars !== rv.origStars
     ? `<div style="font-size:11px; color:${rv.stars > rv.origStars ? '#16a34a' : '#ef4444'}; margin-top:4px;">✏️ Khách đã sửa đánh giá: ${rv.origStars}★ → ${rv.stars}★</div>` : '';
   const reactBtn = (type, icon, n) => `<button onclick="reviewReact('${rv.id}','${type}')" style="border:1px solid ${rv.myReaction === type ? '#3b82f6' : '#cbd5e1'}; background:${rv.myReaction === type ? '#dbeafe' : '#fff'}; border-radius:14px; padding:4px 10px; font-size:12px; cursor:pointer;">${icon} ${n}</button>`;

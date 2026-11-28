@@ -102,3 +102,14 @@ document.getElementById('createVoucherBtn').onclick = () => {
   showUiToast("Đã tạo mã giảm giá!");
   autoSaveGame();
 };
+
+// --- Khách dùng mã giảm giá: nếu có mã đang chạy, 40% khách mang theo 1 mã ---
+function getGuestVoucher(g) {
+  if (!g) return null;
+  if (g.voucherChecked === undefined) {
+    g.voucherChecked = true;
+    const run = activeVouchers.filter(v => getVoucherStatus(v).text === 'Đang chạy');
+    g.voucher = (run.length && Math.random() < 0.4) ? run[Math.floor(Math.random() * run.length)] : null;
+  }
+  return g.voucher || null;
+}

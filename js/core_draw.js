@@ -133,7 +133,7 @@ function draw(){
 
       if (currentRoom.status === 'Có khách' && currentRoom.checkOutTime > 0) {
         const timeLeft = currentRoom.checkOutTime - Date.now(); 
-        const totalTime = currentRoom.stayHours * 12 * 1000; 
+        const totalTime = currentRoom.stayHours * 75 * 1000; 
         let progress = 1 - (timeLeft / totalTime); 
         if (progress < 0) progress = 0; if (progress > 1) progress = 1;
         box(x + 20, y + roomH - 35, roomW - 40, 15, '#cbd5e1'); box(x + 20, y + roomH - 35, (roomW - 40) * progress, 15, '#22c55e');
@@ -143,6 +143,20 @@ function draw(){
 
       label(roomNumber.toString(), x + 15, y + roomH - 15, 16, '#1e293b', 'left');
       label(currentType, x + roomW - 15, y + roomH - 15, 10, '#64748b', 'right');
+
+    if (typeof incActiveForRoom === 'function') { const im = incActiveForRoom(roomNumber); if (im) {
+      const fx = im.status === 'fixing';
+      label(fx ? 'ĐANG SỬA' : 'CẦN SỬA', x + roomW/2, y + 30, 14, fx ? '#3b82f6' : '#ef4444', 'center');
+      const ratio = Math.max(0, Math.min(1, (im.deadline - Date.now()) / INC_LIMIT)), cx = x + roomW/2, cy = y + 75;
+      ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, 20, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ratio);
+      ctx.strokeStyle = fx ? '#3b82f6' : (ratio <= 0.2 ? '#ef4444' : (ratio <= 0.5 ? '#f59e0b' : '#22c55e')); ctx.lineWidth = 5; ctx.stroke();
+      label(Math.ceil(ratio * INC_LIMIT / 1000) + 's', cx, cy + 4, 12, '#1e293b', 'center');
+      if (im.status === 'needTech') {
+        ctx.fillStyle = '#f59e0b'; ctx.fillRect(x + 8, y + 102, roomW - 16, 20);
+        label('📞 Gọi thợ', cx, y + 116, 12, '#ffffff', 'center');
+      }
+    } }
 
     // HIỂN THỊ TRẠNG THÁI DỌN DẸP (CÓ VÒNG TRÒN ĐẾM NGƯỢC)
 if (currentRoom.status === 'Cần dọn') {

@@ -46,7 +46,7 @@ function handleRoomClick(roomNum) {
     showToast(`Bạn đã tự tay dọn sạch phòng ${room.number}!`);
     if (typeof cleanerState !== 'undefined' && cleanerState !== 'none' && cleanerTargetRoom === room.number) { cleanerState = 'none'; cleanerTargetRoom = null; }
     draw();
-  } else if (room.status === 'Có khách') { showToast(`Phòng ${room.number} đang có khách. Không thể dọn!`); } 
+  } else if (room.status === 'Có khách') { const im = (typeof incActiveForRoom === 'function') && incActiveForRoom(room.number); if (im) { if (im.status === 'needTech') incCallTech(im.id); else incPlayerFix(im); return; } showToast(`Phòng ${room.number} đang có khách. Không thể dọn!`); } 
   else { showToast(`Phòng ${room.number} đang trống.`); }
 }
 
@@ -126,6 +126,11 @@ function handleChatAction() {
       let replyText = currentGuest.guests.length === 1 ? `Đây là CCCD của tôi.` : `Tất cả đều ở đây, chúng tôi có ${currentGuest.guests.length} người.`;
       let senderName = currentGuest.guests.length === 1 ? "Khách" : "Người đại diện";
       addChatMessage(senderName, replyText, '#1e3a52', 'left');
+      const gv = getGuestVoucher(currentGuest);
+      if (gv) setTimeout(() => {
+        addChatMessage(senderName, `Mình có mã giảm giá ${gv.code} (giảm ${gv.discount}%), áp dụng giúp mình nhé!`, '#1e3a52', 'left');
+        setTimeout(() => addChatMessage("Lễ tân", `Dạ, ${myPronoun.toLowerCase()} đã áp dụng mã ${gv.code} cho ${guestPronoun} rồi ạ.`, '#e67e22', 'right'), 700);
+      }, 600);
       document.querySelectorAll('.guest-form').forEach(f => f.style.display = 'none');
       const currentForm = document.getElementById('form-' + currentGuest.guests.length); if(currentForm) currentForm.style.display = 'flex';
       const cccdDetails = document.getElementById('cccdDetails');

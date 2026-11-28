@@ -36,7 +36,7 @@ function initUI() {
   // Hàm tạo khách ngẫu nhiên từ 3 đến 15 giây
 function scheduleNextGuest() {
   // Tính toán thời gian ngẫu nhiên (từ 3000ms đến 15000ms)
-  const randomTime = Math.floor(Math.random() * (15000 - 3000 + 1)) + 3000;
+  const randomTime = Math.floor((Math.random() * (15000 - 3000 + 1) + 3000) * guestFlowMultiplier()); // sao càng cao khách càng đông
   
   setTimeout(() => {
     if (!isGamePaused && document.getElementById('chatBox').style.display !== 'block') {
@@ -149,6 +149,13 @@ document.querySelectorAll('.tab').forEach(t=>{
       
       updateReceiptSummary();
       renderReceipt();
+    }
+    else if (t.dataset.tab === 'social') {
+      document.getElementById('confirmRegisterBtn').style.display = 'none';
+      document.getElementById('showBillBtn').style.display = 'none';
+      document.getElementById('closeComputer').style.display = 'block';
+      document.getElementById('guestSummaryBox').style.display = 'none';
+      renderSocial();
     }
     else if (t.dataset.tab === 'diary') {
       document.getElementById('confirmRegisterBtn').style.display = 'none';
@@ -272,7 +279,7 @@ document.querySelectorAll('.msg-tab').forEach(tab => {
     if (!currentGuest) return; const prices = customPrices[currentGuest.reqType]; if (!prices) return;
     let price = prices[selectedRentType]; let multiplier = 1, discount = 0; const size = currentGuest.guests.length;
     if (size === 2) { multiplier = 2; discount = 0.1; } else if (size === 3) { multiplier = 3; discount = 0.2; } else if (size === 4) { multiplier = 4; discount = 0.3; }
-    price = price * multiplier * (1 - discount); const rpEl = document.getElementById('rentPriceDisplay'); if (rpEl) rpEl.innerText = price.toLocaleString('vi-VN') + 'đ';
+    price = price * multiplier * (1 - discount); const rpEl = document.getElementById('rentPriceDisplay'); if (rpEl) rpEl.innerText = fmtVND(price);
   }
 
   // 15. Nút Nhận Phòng
@@ -289,8 +296,8 @@ room.stayHours = currentGuest.stayHours;
 room.guestPos = 'center';
 room.reviewStars = currentGuest.moodStars || 5; // Số sao khách sẽ đánh giá khi trả phòng
 room.reviewGuest = reviewGuestInfo(currentGuest.guests[0], currentGuest.guests.length); room.reviewRecId = ''; room.reviewRecName = '';
-room.checkOutTime = Date.now() + (currentGuest.stayHours * 12 * 1000); // <--- THÊM DÒNG NÀY
-    room.checkOutTime = Date.now() + (currentGuest.stayHours * 12 * 1000); occupiedRooms++;
+room.checkOutTime = Date.now() + (currentGuest.stayHours * 75 * 1000); // <--- THÊM DÒNG NÀY
+    room.checkOutTime = Date.now() + (currentGuest.stayHours * 75 * 1000); occupiedRooms++;
     const checkInDiv = document.getElementById('diaryCheckIn'); if (checkInDiv.innerHTML.includes('Chưa có dữ liệu')) checkInDiv.innerHTML = '';
     const logTimeStr = `${gameTime.getHours().toString().padStart(2, '0')}:${gameTime.getMinutes().toString().padStart(2, '0')} - ${gameTime.getDate()}/${gameTime.getMonth() + 1}`;
     diaryHistory.in.push({ room: room.number, time: logTimeStr });

@@ -14,7 +14,7 @@ document.getElementById('closeExpandBtn').onclick = () => { document.getElementB
 
 document.querySelectorAll('.expand-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.expand-tab').forEach(t => { t.classList.remove('active'); t.classList.add('secondary'); }); tab.classList.add('active'); tab.classList.remove('secondary'); document.querySelectorAll('.expand-content').forEach(c => c.style.display = 'none'); const targetId = 'expand-' + tab.dataset.expand; document.getElementById(targetId).style.display = 'block'; }; });
 
-document.getElementById('buyHotelBtn').onclick = () => { if (isHotelOwner) { showUiToast("Bạn đã là chủ sở hữu của Sunrise Hotel rồi!"); return; } document.getElementById('buyPanelMyMoney').innerText = playerMoney.toLocaleString('vi-VN') + 'đ'; document.getElementById('buyPanelError').style.display = 'none'; document.getElementById('buyHotelPanel').classList.add('show'); };
+document.getElementById('buyHotelBtn').onclick = () => { if (isHotelOwner) { showUiToast("Bạn đã là chủ sở hữu của Sunrise Hotel rồi!"); return; } document.getElementById('buyPanelMyMoney').innerText = fmtVND(playerMoney); document.getElementById('buyPanelError').style.display = 'none'; document.getElementById('buyHotelPanel').classList.add('show'); };
 document.getElementById('cancelBuyBtn').onclick = () => { document.getElementById('buyHotelPanel').classList.remove('show'); };
 
 document.getElementById('confirmBuyBtn').onclick = () => {
@@ -28,7 +28,7 @@ document.querySelectorAll('#expand-inside button')[0].onclick = () => {
   document.getElementById('infoTraffic').innerText = (dailyGuestCount * 3) + " khách/ngày"; 
   
   // CẬP NHẬT BẢNG GIÁ TỪ CUSTOM PRICES
-  const formatPrice = (p) => p.toLocaleString('vi-VN') + 'đ';
+  const formatPrice = (p) => fmtVND(p);
   
   document.getElementById('infoPriceDon_hour').innerText = formatPrice(customPrices["Phòng Đơn"].hour) + '/h';
   document.getElementById('infoPriceDon_night').innerText = formatPrice(customPrices["Phòng Đơn"].night) + '/đêm';
@@ -71,7 +71,7 @@ document.getElementById('closeHotelInfoBtn').onclick = () => { document.getEleme
 // --- CẬP NHẬT BẢNG GIÁ NIÊM YẾT (TAB THÔNG TIN) & Ô NHẬP (TAB QUẢN LÝ) ---
 const PRICE_KEYS = { "Phòng Đơn": "Don", "Phòng Đôi": "Doi", "Phòng VIP": "Vip", "Phòng Lãng Mạn": "LangMan", "Phòng Tổng Thống": "TongThong" };
 function refreshHotelInfoPrices() {
-  const fmt = (p) => p.toLocaleString('vi-VN') + 'đ';
+  const fmt = (p) => fmtVND(p);
   Object.keys(PRICE_KEYS).forEach(name => {
     const k = PRICE_KEYS[name], p = customPrices[name]; if (!p) return;
     const set = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
@@ -81,6 +81,7 @@ function refreshHotelInfoPrices() {
   });
 }
 function fillPriceInputs() {
+  if (typeof updatePriceCapInfo === 'function') updatePriceCapInfo();
   Object.keys(PRICE_KEYS).forEach(name => {
     const k = PRICE_KEYS[name], p = customPrices[name]; if (!p) return;
     ['hour', 'night', 'day'].forEach(t => {

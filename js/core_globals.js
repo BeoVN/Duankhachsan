@@ -1,3 +1,11 @@
+// Định dạng tiền: ngàn, triệu, tỷ, ngàn tỷ, triệu tỷ, tỷ tỷ + VNĐ
+function fmtVND(v) {
+  v = Math.round(Number(v) || 0); const neg = v < 0; if (neg) v = -v;
+  const U = [[1e18, 'tỷ tỷ'], [1e15, 'triệu tỷ'], [1e12, 'ngàn tỷ'], [1e9, 'tỷ'], [1e6, 'triệu'], [1e3, 'ngàn']];
+  let out = v.toLocaleString('vi-VN') + ' VNĐ';
+  for (const [n, name] of U) if (v >= n) { out = (v / n).toLocaleString('vi-VN', { maximumFractionDigits: 3 }) + ' ' + name + ' VNĐ'; break; }
+  return (neg ? '-' : '') + out;
+}
 // ==========================================
 // LÕI GAME: biến toàn cục & danh sách nhân viên
 // ==========================================
@@ -20,7 +28,7 @@ let guestStayHours = 0;
 let currentBillData = null;
 let cashGivenAmount = 0;
 let hotelMoney = 0;
-let playerMoney = 1300000000; 
+let playerMoney = 0; 
 let totalRevenue = 0;
 let occupiedRooms = 0;
 let hotelName = "Sunrise Hotel";

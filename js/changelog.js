@@ -18,8 +18,28 @@ function showChangelog() {
       <!-- PHIÊN BẢN MỚI NHẤT -->
 
 <details open>
-  <summary>Phiên bản 0.4.0 (Mới nhất)</summary>
-  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 17:30 - 24/11/2026</div>
+  <summary>Phiên bản 0.4.4 (Mới nhất)</summary>
+  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 28/11/2026 - 8h00</div>
+  <ul>
+    <li><b>Tất cả được tóm tắt bởi A.I</b></li>
+    <li>✅ <b>Tài khoản:</b> Mỗi người chơi có ID riêng (xem ở Cài đặt). Dữ liệu tự lưu trên mạng, nhập ID ở máy khác để chơi tiếp, mỗi ID chỉ chơi được trên 1 thiết bị. Tên không được trùng với người khác (tên mặc định là player#0000, tối đa 40 ký tự). Có nút Xóa tài khoản để chơi lại từ đầu.</li>
+    <li>✅ <b>Khôi phục:</b> Cài đặt có 3 ô khôi phục 3 ngày gần nhất (lưu mỗi khi sang 0h trong game), hiển thị ngày, tiền và level. Không còn sao lưu bằng mã Code.</li>
+    <li>✅ <b>Sự cố trong khách sạn:</b> Khách có thể nhắn tin báo mất điện, hư máy lạnh, vỡ ống nước, bóng đèn, wifi... Bạn có 90 giây để xử lý. Việc dễ thì tự bấm vào phòng "CẦN SỬA" hoặc gọi nhân viên. Việc khó thì nhân viên sẽ báo để bạn gọi thợ. Tiền sửa trừ vào tiền khách sạn (hoặc tiền của chủ). Không sửa kịp hoặc khách đã rời đi thì bị đánh giá 1 sao.</li>
+    <li>✅ <b>Tiền tip:</b> Khách có thể tip khi thanh toán và khi bạn sửa sự cố nhanh. Khách sạn càng nhiều sao càng dễ được tip.</li>
+    <li>✅ <b>Mã giảm giá:</b> Khách có thể dùng mã giảm giá đang chạy, họ sẽ nhắc mã với lễ tân và hóa đơn được giảm theo phần trăm.</li>
+    <li>✅ <b>Mạng xã hội:</b> Máy tính có thêm trang giống fanpage của khách sạn với các bài quảng cáo, sự kiện, thông báo. Lượt tim, bình luận, chia sẻ tăng dần theo thời gian và bạn có thể bấm xem bình luận.</li>
+    <li>✅ <b>Tuyển nhân viên:</b> Mỗi vị trí chỉ có 1-3 ứng viên. Tuyển hết thì phải chờ 3 ngày trong game mới có người mới.</li>
+    <li>✅ <b>Cá nhân và xếp hạng:</b> Điền thông tin cá nhân và xem thông số (thời gian chơi, tổng tiền đã kiếm, khách phục vụ, level, hệ số phòng tối đa). Bảng xếp hạng gồm tiền, level, lượng khách, thời gian chơi và Top 100 tỉ phú thế giới. Hạng của bạn luôn hiện ở dưới cùng.</li>
+    <li>✅ <b>Nhạc và âm thanh:</b> Có trình phát nhạc trong Cài đặt (danh sách bài, chuyển bài, tua, lặp, ngẫu nhiên, thêm nhạc của bạn). Có tiếng chuông khi khách đến và tiếng tách khi bấm nút.</li>
+    <li>✅ <b>Giao diện:</b> Chọn 1 trong 6 chủ đề màu (Tối, Sáng, Xanh lá dịu, Xanh biển, Cà phê ấm, Tím dịu), đổi cả màn hình tải và menu. Màn hình tải mới hiện tên game, thanh tải ở dưới.</li>
+    <li>✅ <b>Thời gian và tiền:</b> 1 ngày trong game bằng 30 phút ngoài đời, đồng hồ chạy từng phút. Tiền hiển thị theo ngàn, triệu, tỷ... kèm VNĐ. Ván mới bắt đầu với 0 VNĐ và Lv.1.</li>
+    <li>✅ <b>Sửa lỗi:</b> Số sao khách sạn không còn hiện sai 5 sao khi mở bảng đánh giá. Bỏ dòng "Lễ tân phục vụ" trong đánh giá.</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Phiên bản 0.4.0</summary>
+  <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 24/11/2026</div>
   <ul>
     <li><b>Tất cả được tóm tắt bởi A.I</b></li>
     <li>✅ <b>Thông tin khách sạn - Quản lý:</b> Khi chưa mua lại khách sạn, tab Quản lý hiện ổ khóa giống bên Thông tin nhân viên. Bổ sung đủ ô chỉnh giá cho cả 5 loại phòng (Đơn, Đôi, VIP, Lãng Mạn, Tổng Thống). Lưu xong thì bảng giá niêm yết ở tab Thông tin cập nhật ngay, giá được lưu lại khi tải game và áp dụng khi tính hóa đơn.</li>
@@ -33,13 +53,16 @@ function showChangelog() {
     <li>✅ <b>Hệ thống sao mới:</b> Sao khách sạn là trung bình cộng các đánh giá của khách. Khách làm xong thủ tục ở sảnh: đang vui 5 sao, bình thường 4 sao, tức giận 3 sao, bỏ đi vì chờ lâu hoặc hết phòng 1 sao. Đánh giá được ghi khi khách trả phòng.</li>
     <li>✅ <b>Bảng Đánh giá khách hàng:</b> Bấm vào số sao trên màn hình để xem. Mỗi đánh giá có avatar và tên của khách đại diện, số sao, nội dung, nút Like / Dislike và ô phản hồi. Phản hồi an ủi, xin lỗi khiến khách cảm ơn và tăng sao, phản hồi thô lỗ khiến khách giảm sao (mỗi đánh giá sửa được một lần). Khách trả lời sau 5 phút trong game, nội dung câu trả lời phụ thuộc vào lý do đánh giá và ý trong phản hồi của bạn.</li>
     <li>✅ <b>Sao cho nhân viên lễ tân:</b> Mỗi đánh giá lưu lễ tân đã phục vụ. Sao của lễ tân là trung bình giữa sao ban đầu và các đánh giá của khách (hiện trong thẻ nhân viên), và đổi theo khi khách sửa đánh giá.</li>
+    <li>✅ <b>Sao khởi đầu &amp; lượng khách:</b> Khách sạn bắt đầu ở 3 sao (sao = trung bình đánh giá, tính thêm vài lượt đánh giá khởi đầu 3 sao nên không nhảy quá mạnh). Sao càng cao thì khách đến càng đông: 1 sao khoảng 45%, 3 sao 100%, 5 sao khoảng 180% so với mức bình thường. Thông tin khách sạn hiển thị mức lượng khách hiện tại.</li>
+    <li>✅ <b>Giá phòng tối đa theo sao:</b> Giá tối đa = giá gốc x (1 + 0.25 x (sao - 1)), tức 1 sao x1.0, 3 sao x1.5, 5 sao x2.0. Tab Quản lý hiển thị mức tối đa hiện tại, cảnh báo ngay khi gõ giá vượt mức và không cho lưu nếu vượt (báo cần bao nhiêu sao). Khi sao giảm, giá vượt mức tối đa mới sẽ tự hạ xuống.</li>
+    <li>✅ <b>Yêu cầu sao của nhân viên:</b> Mỗi ứng viên yêu cầu khách sạn đạt số sao tương ứng với số sao của họ. Chưa đạt thì hiện thông báo chưa đạt yêu cầu và không thuê được. Nhân viên đã thuê mà khách sạn tụt dưới mức yêu cầu sẽ báo không hài lòng trước, sau đó mỗi ngày có thể xin nghỉ việc (được trả nốt lương còn nợ).</li>
     <li>✅ <b>Tốc độ game:</b> Sửa lỗi có 2 bộ đếm giờ chạy cùng lúc khiến 1 giây ngoài đời bằng 10 phút trong game. Giờ chỉ còn một bộ đếm: 1 giây ngoài đời = 5 phút trong game (khớp với thời gian khách ở phòng). Khách trả lời phản hồi sau 5 phút trong game, tức khoảng 1 giây ngoài đời.</li>
     <li>✅ <b>Màn hình tải mới:</b> Tải thật toàn bộ file và hình ảnh với thanh tiến trình thật, kiểm tra đủ thành phần rồi mới khởi động game và mở nút BẮT ĐẦU. Nếu thiếu file hoặc file bị lỗi, game báo rõ tên file và có nút Tải lại thay vì chạy lỗi.</li>
     <li>✅ <b>Chia nhỏ mã nguồn:</b> Các file script lớn được chia thành khoảng 30 file nhỏ theo chức năng trong thư mục js/ (core_, rooms_, ui_, system_, draw_), dễ sửa chữa và bảo trì hơn.</li>
     <li>✅ <b>Sửa lỗi:</b> Sửa lỗi khách bị kẹt không sinh thêm khi nhân viên dẫn khách đang bận. Sửa lỗi báo lỗi khi tính giá thuê theo loại. Sửa lỗi không mở được bảng nhân viên sau khi mua khách sạn. Đánh giá không còn ghi "Khách ẩn danh".</li>
   </ul>
 </details>
-<details open>
+<details>
   <summary>Phiên bản 0.3.8</summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 23:30 - 15/11/2026</div>
   <ul>
@@ -53,7 +76,7 @@ function showChangelog() {
     <li>✅ <b>Tối ưu hóa code:</b> Tách nhỏ file (modular hóa) giúp dễ quản lý và bảo trì, thêm thuộc tính nạp file an toàn.</li>
   </ul>
 </details>
-<details open>
+<details>
   <summary>Phiên bản 0.3.6 </summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 00:00 - 12/11/2026</div>
   <ul>
@@ -67,7 +90,7 @@ function showChangelog() {
     <li>✅ <b>Tối ưu hóa:</b> Sửa lỗi tạm dừng game bị bù thời gian sai, lỗi thời gian nhảy vọt khi mở bảng Mở rộng. Thanh thời gian trong phòng giữ nguyên vị trí khi tạm dừng. Tăng tốc độ xử lý và cập nhật Toast thông báo.</li>
   </ul>
 </details>
-<details open>
+<details>
   <summary>Phiên bản 0.3.3 </summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 23:00 - 08/11/2026</div>
   <ul>
@@ -82,7 +105,7 @@ function showChangelog() {
     <li>✅ <b>Tối ưu hóa:</b> Sửa lỗi hiển thị thời gian, đồng bộ giờ game vào Sao kê, tự động tải lại trang khi khôi phục dữ liệu, và thay thế các hộp thoại mặc định bằng giao diện thông báo đẹp mắt.</li>
   </ul>
 </details>
-<details open>
+<details>
   <summary>Phiên bản 0.2.8</summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 01:30 - 08/11/2026</div>
   <ul>
@@ -96,7 +119,7 @@ function showChangelog() {
     <li>✅ <b>Hiệu ứng & Trải nghiệm:</b> Khung hội thoại tự động đóng sau 1 giây khi nhận phòng xong. Khung thông báo (Toast) luôn hiển thị trên cùng (không bị che khuất).</li>
   </ul>
 </details>
-      <details open>
+      <details>
   <summary>Phiên bản 0.2.6 </summary>
   <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-style: italic;">📅 Cập nhật: 20:00 - 05/11/2026</div>
   <ul>
@@ -111,7 +134,7 @@ function showChangelog() {
 </details>
 
 
-      <details open>
+      <details>
   <summary>Phiên bản 0.2.5</summary>
   <ul>
   <li><b>Tất cả được tóm tắt bởi A.I</b></li>
@@ -126,7 +149,7 @@ function showChangelog() {
 </details>
 
 
-      <details open>
+      <details>
   <summary>Phiên bản 0.2.2 </summary>
   <ul>
   <li><b>Tất cả được tóm tắt bởi A.I</b></li>
@@ -140,7 +163,7 @@ function showChangelog() {
     <li>✅ <b>Tối ưu hóa:</b> Tự động reset form đăng ký, đóng các bảng khi nhận phòng xong để đón khách mới.</li>
   </ul>
 </details>
-      <details open>
+      <details>
         <summary>Phiên bản 0.2.0 </summary>
         <ul>
         <li><b>Tất cả được tóm tắt bởi A.I</b></li>

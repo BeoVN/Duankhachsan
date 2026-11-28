@@ -24,6 +24,7 @@ function ensureStaffStats() {
       if (typeof p.stars !== 'number') p.stars = 3;
       if (!p.id) p.id = newStaffId();
       if (typeof p.baseStars !== 'number') p.baseStars = p.stars;
+      if (typeof p.reqStars !== 'number') p.reqStars = Math.max(1, (p.baseStars || p.stars || 3) - 1);
       if (typeof p.rvSum !== 'number') p.rvSum = 0;
       if (typeof p.rvCount !== 'number') p.rvCount = 0;
       if (typeof p.speed !== 'number') p.speed = 100;
@@ -66,8 +67,8 @@ function runPayroll() {
   updateMoneyUI();
   addExpense(`Lương nhân viên (${PAYROLL_INTERVAL_DAYS} ngày)`, pay);
   if (typeof showUiToast === 'function') {
-    showUiToast(pay >= total ? '💸 Đã trả lương nhân viên: -' + pay.toLocaleString('vi-VN') + 'đ'
-                              : '⚠️ Không đủ tiền trả lương! Đã trả ' + pay.toLocaleString('vi-VN') + 'đ, còn nợ ' + (total - pay).toLocaleString('vi-VN') + 'đ');
+    showUiToast(pay >= total ? '💸 Đã trả lương nhân viên: -' + fmtVND(pay)
+                              : '⚠️ Không đủ tiền trả lương! Đã trả ' + fmtVND(pay) + ', còn nợ ' + fmtVND((total - pay)));
   }
 }
 // Trả nốt lương còn nợ khi cho nhân viên nghỉ việc

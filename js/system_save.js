@@ -29,7 +29,7 @@ function getGameData() {
   }; 
 }
 
-function createDailyBackup() { payStaffSalaries(); dailyGuestCount = 0; const backupData = { date: `${gameTime.getDate()}/${gameTime.getMonth() + 1}/${gameTime.getFullYear()}`, data: { hotelMoney, playerMoney, totalRevenue, playerLevel, playerExp, maxExp, hotelRating, roomState: JSON.parse(JSON.stringify(roomState)) } }; dailyBackups.push(backupData); if (dailyBackups.length > 3) dailyBackups.shift(); localStorage.setItem('sunriseHotel_DailyBackups', JSON.stringify(dailyBackups)); }
+function createDailyBackup() { payStaffSalaries(); checkStaffResignations(); dailyGuestCount = 0; const backupData = { date: `${gameTime.getDate()}/${gameTime.getMonth() + 1}/${gameTime.getFullYear()}`, data: { hotelMoney, playerMoney, totalRevenue, playerLevel, playerExp, maxExp, hotelRating, roomState: JSON.parse(JSON.stringify(roomState)) } }; dailyBackups.push(backupData); if (dailyBackups.length > 3) dailyBackups.shift(); localStorage.setItem('sunriseHotel_DailyBackups', JSON.stringify(dailyBackups)); }
 const savedBackups = localStorage.getItem('sunriseHotel_DailyBackups'); if (savedBackups) { dailyBackups = JSON.parse(savedBackups); }
 
 function showCustomAlert(message, isConfirm = false, onConfirm = null) {
@@ -113,7 +113,8 @@ function loadAutoSave() {
     if (data.customPrices) customPrices = data.customPrices; 
     if (data.activeVouchers) activeVouchers = data.activeVouchers;
     if (data.staffList) { staffList = data.staffList; }
-    if (data.reviewCount !== undefined) { reviewSum = data.reviewSum || 0; reviewCount = data.reviewCount || 0; guestReviews = data.guestReviews || []; fixAnonymousReviews(); if (reviewCount > 0) hotelRating = reviewSum / reviewCount; }
+    if (data.reviewCount !== undefined) { reviewSum = data.reviewSum || 0; reviewCount = data.reviewCount || 0; guestReviews = data.guestReviews || []; fixAnonymousReviews(); }
+    recalcHotelRating(); // sao = trung bình đánh giá + 3 sao khởi đầu
     if (data.totalExpenses !== undefined) totalExpenses = data.totalExpenses;
     if (data.staffPayrollDay !== undefined) staffPayrollDay = data.staffPayrollDay;
     if (Array.isArray(data.receiptHistory)) receiptHistory = data.receiptHistory;
@@ -151,6 +152,7 @@ if (data.roomState && data.roomState.length > 0) {
     document.getElementById('hudExp').innerText = `${playerExp}/${maxExp}`; 
     document.getElementById('expFill').style.width = `${(playerExp / maxExp) * 100}%`; 
     document.getElementById('rating').innerText = hotelRating.toFixed(1); 
+    refreshRatingUI(); 
     updateClockUI(); 
     draw(); 
     showUiToast("Đã tải lại tiến trình đang chơi!"); 

@@ -57,7 +57,7 @@
       if (typeof bgmAudio !== 'undefined') {
         bgmAudio.volume = vol; 
         if (vol > 0 && !isBGMPlaying) { 
-          bgmAudio.play().catch(err => console.log(err)); 
+          /* nhạc do system_music.js phát */ 
           isBGMPlaying = true; 
         } 
       }
@@ -97,7 +97,7 @@ if (loadGameBtn) {
       playerLevel = data.playerLevel;
       playerExp = data.playerExp;
       maxExp = data.maxExp;
-      hotelRating = data.hotelRating;
+      recalcHotelRating();
       
       data.roomState.forEach((savedRoom, idx) => { roomState[idx] = savedRoom; });
 
@@ -132,7 +132,7 @@ if (restore3DaysBtn) {
       playerLevel = data.playerLevel;
       playerExp = data.playerExp;
       maxExp = data.maxExp;
-      hotelRating = data.hotelRating;
+      recalcHotelRating();
       roomState = data.roomState;
       
       updateMoneyUI();
@@ -158,6 +158,7 @@ if (resetGameBtn) {
       localStorage.removeItem('sunriseHotel_AutoSave'); 
       localStorage.removeItem('sunriseHotel_SaveData'); 
       localStorage.removeItem('sunriseHotel_DailyBackups'); 
+      localStorage.removeItem('sunriseHotel_Incidents'); localStorage.removeItem('sunriseHotel_Recruit'); localStorage.removeItem('sunriseHotel_Profile');
       dailyBackups = [];
       location.reload();
     });

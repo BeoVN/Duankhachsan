@@ -20,23 +20,9 @@ document.querySelectorAll('.price-input').forEach(input => {
       this.value = parseInt(rawValue).toLocaleString('vi-VN');
     }
 
-    // 3. Kiểm tra cảnh báo (Giá gấp 2 lần -> Hơi mắc, gấp 3 lần -> Quá mắc)
-const currentVal = parseInt(rawValue) || 0;
-const warnId = 'warn' + this.id.replace('price', '');
-const warnEl = document.getElementById(warnId);
-
-if (warnEl) {
-  if (currentVal >= originalVal * 3) {
-    warnEl.style.display = 'block';
-    warnEl.style.color = '#ef4444'; // Đỏ (Quá mắc)
-    warnEl.innerHTML = '⚠️ Giá này quá mắc!';
-  } else if (currentVal >= originalVal * 2) {
-    warnEl.style.display = 'block';
-    warnEl.style.color = '#f59e0b'; // Cam (Hơi mắc)
-    warnEl.innerHTML = '⚠️ Giá này hơi mắc so với giá gốc';
-  } else {
-    warnEl.style.display = 'none';
-  }
-}
+    // 3. Cảnh báo theo mức giá tối đa (phụ thuộc số sao khách sạn)
+    const currentVal = parseInt(rawValue) || 0;
+    const warnEl = document.getElementById('warn' + this.id.replace('price', ''));
+    if (warnEl) showPriceCapWarning(this, warnEl, currentVal);
   });
 });

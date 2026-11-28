@@ -9,6 +9,7 @@ function autoApplyCheckIn(room, bill) {
   hotelMoney += finalPrice - commission;
   playerMoney += commission;
   totalRevenue += finalPrice;
+  maybeBillTip(finalPrice); profAddGuests(g.guests.length);
   addExp(Math.floor(finalPrice / 10000));
   // Tâm trạng khách ở sảnh quyết định số sao khách đánh giá khi trả phòng (lễ tân ít sao đôi khi làm khách phật ý)
   let mood = getGuestMoodStars();
@@ -23,7 +24,7 @@ function autoApplyCheckIn(room, bill) {
   room.guests = null;
   room.stayHours = g.stayHours;
   room.guestPos = 'center';
-  room.checkOutTime = Date.now() + (g.stayHours * 12 * 1000);
+  room.checkOutTime = Date.now() + (g.stayHours * 75 * 1000);
   occupiedRooms++;
   const logTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}`;
   diaryHistory.in.push({ room: room.number, time: logTimeStr });
@@ -41,7 +42,7 @@ function buildAutoSteps() {
   const gp = autoGuestPronoun(g.guests[0], rec.age);
   const my = autoCap(autoMyPronoun(gp));
   const replyPro = multi ? 'Chúng tôi' : autoCap(gp);
-  const fmt = (n) => n.toLocaleString('vi-VN') + 'đ';
+  const fmt = (n) => fmtVND(n);
 
   const leaveStep = (recLine) => ({ d: 1500, fn: () => {
     autoSay('rec', recLine);
@@ -81,6 +82,10 @@ function buildAutoSteps() {
       g.timeIn = `${p2(now.getHours())}:${p2(now.getMinutes())} - ${now.getDate()}/${now.getMonth() + 1}`;
       g.timeOut = `${p2(outTime.getHours())}:${p2(outTime.getMinutes())} - ${outTime.getDate()}/${outTime.getMonth() + 1}`;
     } },
+    ...(getGuestVoucher(g) ? [
+      { d: 1400, fn: () => autoSay('guest', `Tôi có mã giảm giá ${g.voucher.code} (giảm ${g.voucher.discount}%), áp dụng giúp nhé!`) },
+      { d: 1300, fn: () => autoSay('rec', `Dạ, ${my.toLowerCase()} đã áp dụng mã ${g.voucher.code} rồi ạ.`) }
+    ] : []),
     { d: 1600, fn: () => {
       const room = roomState.find(r => Math.floor(r.number / 100) === g.reqFloor && r.status === 'Trống');
       if (!room) {
@@ -91,10 +96,12 @@ function buildAutoSteps() {
       const size = g.guests.length;
       const mult = size; const disc = size === 2 ? 0.1 : size === 3 ? 0.2 : size === 4 ? 0.3 : 0;
       const prices = customPrices[g.reqType];
-      const basePrice = prices[g.rentType] * mult * (1 - disc);
+      let basePrice = prices[g.rentType] * mult * (1 - disc);
+      const gv = getGuestVoucher(g);
+      if (gv) basePrice = basePrice * (1 - gv.discount / 100);
       const vat = basePrice * 0.1;
       R.bill = { basePrice, vat, total: basePrice + vat };
-      autoSay('rec', `Dạ còn Phòng ${room.number} ạ. Tổng tiền (đã gồm VAT 10%) là ${fmt(R.bill.total)}.`);
+      autoSay('rec', `Dạ còn Phòng ${room.number} ạ. Tổng tiền (đã gồm VAT 10%) là ${fmt(R.bill.total)}${gv ? ` (đã áp mã ${gv.code} -${gv.discount}%)` : ''}.`);
     } },
     { d: 1500, fn: () => autoSay('rec', `Dạ ${gp} muốn thanh toán bằng tiền mặt hay quét mã QR ạ?`) },
     { d: 1500, fn: () => {

@@ -20,6 +20,7 @@ function refreshRatingUI() {
   const info = document.getElementById('infoRating');
   if (info) info.innerText = ratingText();
   if (typeof updateReviewSummary === 'function') updateReviewSummary();
+  if (typeof updateRatingEffectsUI === 'function') updateRatingEffectsUI();
 }
 function reviewGuestInfo(p, size) { return p ? { name: p.name, age: p.age, isMale: p.isMale, size: size || 1 } : null; }
 // Khách đại diện của phòng (dùng khi dữ liệu cũ chưa lưu sẵn thông tin khách)
@@ -63,7 +64,7 @@ function makeReviewText(stars, info) {
 function addGuestReview(stars, info = {}) {
   reviewSum += stars;
   reviewCount++;
-  hotelRating = reviewSum / reviewCount;
+  recalcHotelRating();
   const now = gameTime;
   const g = info.guest || randomGuestIdentity();
   const rv = {
@@ -95,7 +96,7 @@ function adjustReviewStars(rv, newStars) {
   if (delta === 0) return;
   rv.stars = newStars;
   reviewSum += delta;
-  if (reviewCount > 0) hotelRating = reviewSum / reviewCount;
+  recalcHotelRating();
   if (rv.recId) {
     const p = (staffList.leTan || []).find(x => x.id === rv.recId);
     if (p) { p.rvSum = (p.rvSum || 0) + delta; recalcStaffStars(p); }

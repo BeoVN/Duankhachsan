@@ -5,7 +5,7 @@
 // 4. HỆ THỐNG THỜI GIAN & VÒNG LẶP
 // ==========================================
 // Tốc độ game: 1 giây ngoài đời = 5 phút trong game (chỉ có MỘT bộ đếm giờ chạy)
-const GAME_MINUTES_PER_SECOND = 5;
+const GAME_MINUTES_PER_SECOND = 0.8; // 1 ngày game = 30 phút ngoài đời; đồng hồ nhảy 1 phút mỗi 1.25 giây
 
 function updateClockUI() {
   const h = gameTime.getHours().toString().padStart(2, '0');
@@ -26,7 +26,7 @@ setInterval(() => {
   if (!isGameStarted || isGamePaused) return; 
 
   const oldHour = gameTime.getHours();
-  gameTime.setMinutes(gameTime.getMinutes() + GAME_MINUTES_PER_SECOND); 
+  gameTime.setMinutes(gameTime.getMinutes() + 1); 
   const newHour = gameTime.getHours();
   updateClockUI(); 
   
@@ -50,7 +50,7 @@ setInterval(() => {
     lastBackupDay = gameTime.getDate();
     createDailyBackup();
   }
-}, 1000);
+}, 1250);
 
 setInterval(() => {
   if (isGamePaused) return; 

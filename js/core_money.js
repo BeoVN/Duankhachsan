@@ -22,7 +22,7 @@ function updateReceiptSummary() {
   const LA = document.getElementById('billLabelA'), LB = document.getElementById('billLabelB');
   const ex = document.getElementById('bill-extra');
   if (!A || !B) return;
-  const fmt = (n) => Math.round(n).toLocaleString('vi-VN') + 'đ';
+  const fmt = (n) => fmtVND(Math.round(n));
   if (isHotelOwner) {
     if (LA) LA.innerText = 'Tiền khách sạn:';
     if (LB) LB.innerText = 'Các khoản chi:';

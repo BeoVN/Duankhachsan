@@ -20,6 +20,8 @@ function generateBill() {
   // KHAI BÁO BIẾN basePrice VÀ TÍNH TOÁN
   let basePrice = prices[currentGuest.rentType] * multiplier * (1 - discount); 
   
+  const gv = getGuestVoucher(currentGuest);
+  if (gv) basePrice = basePrice * (1 - gv.discount / 100);
   const vat = basePrice * 0.1; 
   const total = basePrice + vat;
   
@@ -47,11 +49,12 @@ function generateBill() {
   let calcText = `(${prices[currentGuest.rentType].toLocaleString('vi-VN')} x ${multiplier}`; 
   if (discount > 0) { calcText += ` - ${discount * 100}%`; } 
   calcText += `)`; 
+  if (gv) calcText += ` · Mã ${gv.code} -${gv.discount}%`;
   document.getElementById('billCalcDetail').innerText = calcText;
   
-  document.getElementById('billPrice').innerText = basePrice.toLocaleString('vi-VN') + 'đ'; 
-  document.getElementById('billVat').innerText = vat.toLocaleString('vi-VN') + 'đ'; 
-  document.getElementById('billTotal').innerText = total.toLocaleString('vi-VN') + 'đ';
+  document.getElementById('billPrice').innerText = fmtVND(basePrice); 
+  document.getElementById('billVat').innerText = fmtVND(vat); 
+  document.getElementById('billTotal').innerText = fmtVND(total);
   
   document.getElementById('billPanel').classList.add('show');
 }
@@ -68,6 +71,7 @@ function finishPayment() {
   totalRevenue += finalPrice; 
   occupiedRooms++; 
   updateMoneyUI();
+  maybeBillTip(finalPrice); profAddGuests(currentGuest.guests.length);
   
   const expEarned = Math.floor(finalPrice / 10000); 
   addExp(expEarned); 
@@ -114,12 +118,14 @@ function renderReceipt() {
   
   // Dùng slice().reverse() để đảo ngược mảng, giúp giao dịch mới nhất nằm trên cùng
   receiptHistory.slice().reverse().forEach(item => {
-    if (item.type === 'expense') {
-      list.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>💸 ${item.label}</b><br><span style="color:#888">${item.time}</span></div><div style="text-align:right; color:#ef4444; font-weight:bold;">Chi: -${item.amount.toLocaleString('vi-VN')}đ</div></div>`);
+    if (item.type === 'tip') {
+      list.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>💝 ${item.label}</b><br><span style="color:#888;">${item.time}</span></div><div style="color:#16a34a; font-weight:bold;">+${fmtVND(Math.round(item.amount))}</div></div>`);
+    } else if (item.type === 'expense') {
+      list.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>💸 ${item.label}</b><br><span style="color:#888">${item.time}</span></div><div style="text-align:right; color:#ef4444; font-weight:bold;">Chi: -${fmtVND(item.amount)}</div></div>`);
     } else if (item.owner) {
-      list.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${item.room}</b><br><span style="color:#888">${item.time}</span></div><div style="text-align:right; color:#16a34a; font-weight:bold;">Thu: +${item.price.toLocaleString('vi-VN')}đ</div></div>`);
+      list.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${item.room}</b><br><span style="color:#888">${item.time}</span></div><div style="text-align:right; color:#16a34a; font-weight:bold;">Thu: +${fmtVND(item.price)}</div></div>`);
     } else {
-      list.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${item.room}</b><br><span style="color:#888">${item.time}</span></div><div style="text-align:right;"><div style="color:#2c6e9e;">KS thu: ${item.price.toLocaleString('vi-VN')}đ</div><div style="color:#e67e22;">Hoa hồng: +${item.commission.toLocaleString('vi-VN')}đ</div></div></div>`);
+      list.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ccc; font-size:12px;"><div><b>Phòng ${item.room}</b><br><span style="color:#888">${item.time}</span></div><div style="text-align:right;"><div style="color:#2c6e9e;">KS thu: ${fmtVND(item.price)}</div><div style="color:#e67e22;">Hoa hồng: +${fmtVND(item.commission)}</div></div></div>`);
     }
   });
 }
