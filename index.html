@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#172638">
-<title>Khách sạn của tôi - v0.4.0</title>
+<title>Khách sạn của tôi - v0.4.4</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
     <div class="menu-buttons">
       <button class="btn-main" id="startBtn" disabled style="opacity:1;">▶ BẮT ĐẦU</button>
       <button class="btn-sub" id="guideBtn">📖 HƯỚNG DẪN</button>
-      <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.4.0)</button>
+      <button class="btn-sub" id="updateBtn">🔄 XEM CHI TIẾT CẬP NHẬT (v0.4.4)</button>
       
       <!-- KHUNG THÔNG TIN NGƯỜI CHƠI -->
       <div id="menuPlayerInfo" style="margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #456078; border-radius: 10px; text-align: left; font-size: 13px; color: #c9d8e6; display: flex; flex-direction: column; gap: 5px;">
@@ -74,7 +74,7 @@
       <span id="hudExp">0/100</span>
     </div>
     <div class="version" style="display:flex; align-items:center; gap:6px;">
-      v0.4.0
+      v0.4.4
       <!-- Nút Cài đặt thu nhỏ bằng icon bánh răng -->
       <span id="btnSettings" style="cursor:pointer; font-size:14px; background:#1a2b3d; border:1px solid #3a5068; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">⚙️</span>
     </div>
@@ -131,6 +131,7 @@
       <button class="tab" data-tab="messages">💬 Tin nhắn</button>
       <button class="tab" data-tab="diary">📖 Nhật ký</button>
       <button class="tab" data-tab="profiles">📁 Hồ sơ khách</button>
+      <button class="tab" data-tab="social">🌐 Mạng xã hội</button>
     </div>
 
 <!-- Tab Đăng ký với 4 Form -->
@@ -339,6 +340,8 @@
         </div>
       </div>
     </div>
+    <div class="tab-content" id="tab-social"><div id="social-box" style="max-height:400px; overflow-y:auto;"></div></div>
+
     <div class="tab-content" id="tab-profiles">
   <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; color:#1e3a52;">
     <span>Lịch sử lưu trú</span>
@@ -430,9 +433,14 @@
 
   <!-- Bảng Cá Nhân -->
 <section class="panel" id="profilePanel" style="z-index: 10005;">
-  <div class="window" style="width:min(400px,100%);">
-    <h2>👤 THÔNG TIN CÁ NHÂN</h2>
-    <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+  <div class="window" style="width:min(520px,100%); padding-bottom:14px;">
+    <h2>👤 CÁ NHÂN</h2>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="btn-base prof-tab" data-pt="info" style="flex:1; padding:8px; font-size:13px;">📋 Thông tin</button>
+      <button class="btn-base secondary prof-tab" data-pt="rank" style="flex:1; padding:8px; font-size:13px;">🏆 Xếp hạng</button>
+    </div>
+    <div id="profTabInfo" style="max-height:60vh; overflow-y:auto;">
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
   <div>
     <label style="font-size:12px; font-weight:bold; color:#5a6b7c;">Tên hiển thị</label>
     <input type="text" id="inputName" class="input-field" value="Minh">
@@ -452,13 +460,22 @@
   </div>
   <!-- ----------------- -->
 
-  <div style="background:#d4e2ed; padding:10px; border-radius:8px; display:flex; justify-content:space-between;">
-    <b>Cấp độ (LV):</b> <span style="color:#2c6e9e; font-weight:900;">1</span>
-  </div>
+        <div id="profStats" style="background:#d4e2ed; padding:10px; border-radius:8px; font-size:13px; line-height:1.9;"></div>
+      </div>
     </div>
-    
-    <!-- Thanh nút bấm của Cá nhân (Đã sửa lại) -->
-    <div class="panel-actions" style="margin-top:20px;">
+    <div id="profTabRank" style="display:none; margin-top:12px;">
+      <input type="hidden" id="rankType" value="money">
+      <div id="rankBtns" style="display:flex; gap:6px;">
+        <button class="btn-base rank-btn" data-rt="money" style="flex:1; padding:8px 2px; font-size:12px;">💰 Tiền</button>
+        <button class="btn-base rank-btn secondary" data-rt="level" style="flex:1; padding:8px 2px; font-size:12px;">⭐ Level</button>
+        <button class="btn-base rank-btn secondary" data-rt="guests" style="flex:1; padding:8px 2px; font-size:12px;">🧑 Khách</button>
+        <button class="btn-base rank-btn secondary" data-rt="time" style="flex:1; padding:8px 2px; font-size:12px;">⏱️ Giờ</button>
+        <button class="btn-base secondary rank-btn" data-rt="bill" style="flex:1; padding:8px 2px; font-size:12px;">🌍 Tỉ phú</button>
+      </div>
+      <div id="rankList" style="max-height:40vh; overflow-y:auto; margin-top:8px;"></div>
+      <div id="rankMe" style="margin-top:6px;"></div>
+    </div>
+    <div class="panel-actions" style="margin-top:16px;">
       <button class="btn-base secondary" id="closeProfile">← Đóng</button>
       <button class="btn-base" id="saveProfile">Lưu thay đổi</button>
     </div>
@@ -587,6 +604,14 @@
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:13px; font-weight:bold; color:#1e3a52;">Hiệu ứng (SFX)</span>
           <input type="range" id="sfxVolume" min="0" max="100" value="50" style="width:50%;">
+        </div>
+        <div style="margin-top:10px; border-top:1px dashed #cbd5e1; padding-top:8px;">
+          <div id="bgmCustomName" style="font-size:12px; color:#64748b; margin-bottom:6px;">Đang dùng: nhạc mặc định</div>
+          <input type="file" id="bgmFile" accept="audio/*" style="display:none;">
+          <div style="display:flex; gap:6px;">
+            <button class="btn-base secondary" id="bgmUploadBtn" style="flex:1; padding:8px; font-size:12px;">📁 Tải nhạc lên</button>
+            <button class="btn-base secondary" id="bgmResetBtn" style="flex:1; padding:8px; font-size:12px;">↩️ Mặc định</button>
+          </div>
         </div>
       </div>
 
@@ -718,10 +743,13 @@
           <span style="color:#64748b;">Số phòng:</span> <b style="color:#1e3a52;">30 phòng (5 tầng)</b>
         </div>
         <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px;">
-          <span style="color:#64748b;">Đánh giá:</span> <b id="infoRating" style="color:#e67e22;">5.0 ⭐</b>
+          <span style="color:#64748b;">Đánh giá:</span> <b id="infoRating" style="color:#e67e22;">3.0 ⭐</b>
         </div>
         <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px; margin-bottom: 5px;">
           <span style="color:#64748b;">Lưu lượng khách (24h):</span> <b id="infoTraffic" style="color:#2c6e9e;">0 khách</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding-bottom:5px; margin-bottom: 5px;">
+          <span style="color:#64748b;">Lượng khách theo sao:</span> <b id="infoFlow" style="color:#2c6e9e; text-align:right;">Bình thường (100% so với mức 3⭐)</b>
         </div>
 
         <!-- CHI TIẾT GIÁ PHÒNG -->
@@ -799,6 +827,7 @@
 
         <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #cbd5e1;">
           <h3 style="font-size:14px; color:#2c6e9e; margin-top:0; margin-bottom:5px;">💰 Tùy chỉnh Giá Phòng</h3>
+          <div id="priceCapInfo" style="font-size:12px; color:#1e3a52; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px; margin-bottom:8px; line-height:1.5;"></div>
           <p style="font-size:11px; color:#888; margin-bottom:10px; font-style:italic;">*Lưu ý: Nếu giá quá cao, khách sẽ chê mắc và không đến.</p>
           
           <div style="display:flex; flex-direction:column; gap:15px;">
